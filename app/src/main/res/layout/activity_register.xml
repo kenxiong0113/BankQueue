@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tv_username"
+        android:text="用户名"
+        style="@style/RegisterTextView"
+        />
+    <EditText
+        android:id="@+id/et_phone"
+        android:hint="请输入手机号码"
+        android:layout_toEndOf="@+id/tv_username"
+        android:inputType="phone"
+        style="@style/RegisterEditText"
+        android:maxLength="11"
+        />
+    <View
+       style="@style/RegisterView"
+        android:layout_below="@+id/et_phone"
+        android:id="@+id/view2" />
+    <TextView
+        android:id="@+id/tv_verification_code"
+        style="@style/RegisterTextView"
+        android:text="验证码"
+        android:layout_below="@+id/et_phone"/>
+    <EditText
+        android:id="@+id/et_code"
+        android:hint="短信验证码"
+        android:layout_toEndOf="@+id/tv_username"
+        android:layout_below="@id/et_phone"
+        android:inputType="phone"
+        android:maxLength="6"
+        style="@style/RegisterEditText"
+
+        />
+
+    <View
+        style="@style/RegisterView"
+        android:layout_below="@+id/tv_verification_code"
+        android:id="@+id/view" />
+
+
+
+    <Button
+        android:id="@+id/btn_code"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="5dp"
+        android:layout_below="@+id/view2"
+        android:background="#03A9F4"
+        android:layout_marginEnd="5dp"
+        android:textColor="@color/white"
+        android:text="发送验证码" />
+
+    <Button
+        android:id="@+id/btn_next_step"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="下一步"
+        android:layout_below="@+id/view"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="20dp"
+        />
+
+</RelativeLayout>

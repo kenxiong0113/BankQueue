@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/et_phone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="12"
+        android:inputType="phone"
+        android:hint="请输入手机号"
+        android:drawableStart="@drawable/ic_phone"
+        android:background="@drawable/et_sharp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="140dp"
+        android:maxLength="11"
+         />
+
+    <EditText
+        android:id="@+id/et_password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="12"
+        android:hint="请输入密码"
+        android:drawableStart="@drawable/ic_password"
+        android:background="@drawable/et_sharp"
+        android:inputType="textPassword"
+        android:layout_below="@id/et_phone"
+        android:layout_marginTop="20dp"
+        android:layout_alignStart="@id/et_phone"
+        android:maxLength="16"
+        />
+
+    <Button
+        android:id="@+id/btn_login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="登录"
+        android:layout_below="@+id/et_password"
+        android:layout_marginTop="20dp"
+        android:layout_alignStart="@+id/et_password"
+        android:layout_alignEnd="@+id/et_password" />
+
+    <TextView
+        android:id="@+id/tv_forget"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/btn_login"
+        android:layout_below="@+id/btn_login"
+        android:layout_marginTop="10dp"
+        android:text="忘记密码?" />
+
+    <TextView
+        android:id="@+id/tv_register"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/btn_login"
+        android:layout_alignTop="@+id/tv_forget"
+        android:text="立即注册>" />
+
+</RelativeLayout>
