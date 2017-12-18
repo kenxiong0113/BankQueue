@@ -4,10 +4,11 @@
     android:orientation="vertical"
     android:layout_height="match_parent">
 
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:background="@color/colorPrimary"
+        android:background="@color/colorPrimaryDark"
         android:layout_height="wrap_content">
 
         <TextView
@@ -16,14 +17,15 @@
             android:textColor="@android:color/white"
             android:layout_gravity="center"
             android:layout_height="wrap_content"
+            android:textSize="@dimen/toolbarTextSize"
             android:text="111111"/>
 
     </android.support.v7.widget.Toolbar>
-
     <FrameLayout
         android:id="@+id/viewContent"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_weight="1">
     </FrameLayout>
 
 </LinearLayout>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="160dp"
+    android:background="@color/colorPrimary"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark">
+
+   <com.facebook.drawee.view.SimpleDraweeView
+       android:id="@+id/sdv_head"
+       android:layout_width="48dp"
+       android:layout_height="48dp"
+       android:layout_marginTop="38dp"
+       android:layout_marginLeft="24dp"
+       android:background="@drawable/ic_user"
+       />
+
+    <TextView
+        android:id="@+id/tv_nickname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/app_name"
+        android:layout_toRightOf="@+id/sdv_head"
+        android:layout_alignTop="@+id/sdv_head"
+        android:textSize="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="8dp"
+        android:textColor="@color/white"
+        />
+</RelativeLayout>

@@ -4,8 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -54,11 +54,20 @@ public class RegisterActivity extends BaseActivity {
 
     @Override
     protected void init(Bundle savedInstanceState) {
-        setTitle("手机验证注册");
+       initToolbar();
         mContext = getApplicationContext();
 
     }
 
+    private void initToolbar(){
+        setTitle("手机验证注册");
+        setTopLeftButton(R.drawable.ic_return, new OnClickListener() {
+            @Override
+            public void onClick() {
+                finish();
+            }
+        });
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,7 +83,7 @@ public class RegisterActivity extends BaseActivity {
                     String strP3 = phone.substring(0, 3);
                     int p3 = Integer.valueOf(strP3);
                     PhoneNumber number = new PhoneNumber();
-                    if (number.PhoneNumber(p3)) {
+                    if (number.phoneNumber(p3)) {
                         //重新获取验证码倒计时
                         new CountDownTimer(60000, 1000) {
                             @Override
@@ -97,11 +106,14 @@ public class RegisterActivity extends BaseActivity {
                                     LogUtil.e("smile", "短信id：" + smsId);
                                     isPhone = true;
                                 } else {
+                                    btnCode.setEnabled(true);
+                                    btnCode.setText("发送验证码");
                                     Toast.makeText(RegisterActivity.this, ex.getMessage(), Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });
                     } else {
+
                         Toast.makeText(this, "请输入正确的手机号", Toast.LENGTH_SHORT).show();
                     }
                 }else {
@@ -116,10 +128,10 @@ public class RegisterActivity extends BaseActivity {
                         intent.putExtra("phone",phone);
                         intent.putExtra("code",code);
                         startActivity(intent);
+                        finish();
                     }else {
                         Toast.makeText(this, "请输入正确的手机号和验证码", Toast.LENGTH_SHORT).show();
                     }
-
                 break;
 
             default:

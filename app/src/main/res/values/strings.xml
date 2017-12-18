@@ -1,6 +1,10 @@
 <resources>
-    <string name="app_name">BankQueue</string>
+    <string name="app_name">Bank优排</string>
     <string name="title_business">业务</string>
     <string name="title_subscribe">预约</string>
-    <string name="title_my">我的</string>
+    <string name="title_my">待定</string>
+    <string name="exit">退出登录</string>
+    <string name="my_info">我的资料</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
 </resources>

@@ -2,7 +2,9 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@mipmap/login"
+    >
 
     <EditText
         android:id="@+id/et_phone"
@@ -14,7 +16,7 @@
         android:drawableStart="@drawable/ic_phone"
         android:background="@drawable/et_sharp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="140dp"
+        android:layout_marginTop="202dp"
         android:maxLength="11"
          />
 
@@ -39,7 +41,7 @@
         android:layout_height="wrap_content"
         android:text="登录"
         android:layout_below="@+id/et_password"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="50dp"
         android:layout_alignStart="@+id/et_password"
         android:layout_alignEnd="@+id/et_password" />
 
@@ -60,4 +62,8 @@
         android:layout_alignTop="@+id/tv_forget"
         android:text="立即注册>" />
 
+    <ProgressBar
+        android:id="@+id/progress"
+        style="@style/ProgressBar"
+        />
 </RelativeLayout>
