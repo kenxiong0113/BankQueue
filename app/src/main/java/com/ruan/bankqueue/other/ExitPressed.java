@@ -6,7 +6,7 @@ import android.widget.Toast;
 
 /**
  * 按两次退出程序
- * @author by ken on 2017/12/16.
+ * @author by ruan on 2017/12/16.
  */
 
 public class ExitPressed {
@@ -17,8 +17,8 @@ public class ExitPressed {
             BaseConstants.RunTime.EXIT_TIME = System.currentTimeMillis();
             isExit = false;
         } else {
-            System.exit(0);
-            Process.killProcess(Process.myPid());
+//            System.exit(0);
+//            Process.killProcess(Process.myPid());
             isExit = true;
         }
         return isExit;

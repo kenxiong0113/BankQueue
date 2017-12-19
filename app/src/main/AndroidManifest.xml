@@ -48,6 +48,21 @@
         <activity android:name="com.amap.api.navi.AmapRouteActivity"
             android:theme="@android:style/Theme.NoTitleBar"
             android:configChanges="orientation|keyboardHidden|screenSize" />
+        <activity
+            android:name="cn.bmob.v3.update.UpdateDialogActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+        </activity>
+
+        <!--兼容android 7.0-->
+        <provider
+            android:authorities="cn.bmob.update.fileprovider"
+            android:name="android.support.v4.content.FileProvider"
+            android:grantUriPermissions="true"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

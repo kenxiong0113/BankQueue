@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cn.bmob.v3.BmobUser;
+import cn.bmob.v3.update.BmobUpdateAgent;
 
 /**
  * @author by ruan
@@ -70,6 +71,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         context = getApplicationContext();
+//        创建AppVersion表
+        // TODO: 2017/12/19 创建成功即清理此行
+//        BmobUpdateAgent.initAppVersion();
+        BmobUpdateAgent.setUpdateOnlyWifi(false);
+        BmobUpdateAgent.update(this);
         initToolbar();
         initDrawerLayout();
         initBottomNavigationBar();
@@ -150,6 +156,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 transaction.replace(R.id.content, subscribeFragment);
                 break;
             case 2:
+
                 myFragment = MyFragment.newInstance(getString(R.string.title_my));
                 tvToolbar.setText(getString(R.string.title_my));
                 transaction.replace(R.id.content, myFragment);
@@ -189,18 +196,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      */
     @Override
     public void onBackPressed() {
+        ExitPressed pressed = new ExitPressed();
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         }
         //    2秒内按两次back退出应用程序
-        else if(System.currentTimeMillis() - BaseConstants.RunTime.EXIT_TIME > BaseConstants.RunTime.TIME) {
-            Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
-            BaseConstants.RunTime.EXIT_TIME = System.currentTimeMillis();
-        } else {
+        else if (pressed.exitPressed(context)){
             finish();
-            System.exit(0);
-            android.os.Process.killProcess(android.os.Process.myPid());
         }
+
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
