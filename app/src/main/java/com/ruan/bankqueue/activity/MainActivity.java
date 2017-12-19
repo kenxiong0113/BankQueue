@@ -215,6 +215,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (id == R.id.nav_my_info) {
             Toast.makeText(context, "点击了我的资料", Toast.LENGTH_SHORT).show();
             // Handle the camera action
+        } else if (id == R.id.nav_version){
+            Intent intent = new Intent(context,VersionActivity.class);
+            startActivity(intent);
+
         } else if (id == R.id.nav_exit) {
             Intent intent = new Intent(getApplication(), LoginActivity.class);
             startActivity(intent);
