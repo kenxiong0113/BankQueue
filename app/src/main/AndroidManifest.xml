@@ -43,6 +43,8 @@
         <activity android:name=".activity.MainActivity"/>
         <activity android:name=".activity.SetPasswordActivity"/>
         <activity android:name=".activity.VersionActivity"/>
+
+
         <meta-data android:name="com.amap.api.v2.apikey"
             android:value="5d13e9b9cac718942735634c90382113"/>
         <service android:name="com.amap.api.location.APSService"/>
