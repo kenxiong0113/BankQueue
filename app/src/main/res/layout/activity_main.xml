@@ -6,7 +6,6 @@
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:scaleType="fitXY"
     android:fitsSystemWindows="false"
     tools:openDrawer="start"
     tools:context="com.ruan.bankqueue.activity.MainActivity">
@@ -23,6 +22,7 @@
         layout="@layout/app_bar_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/toolbarTextSize"
         />
 
     <android.support.design.widget.NavigationView

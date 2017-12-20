@@ -21,7 +21,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/img_logo"
         android:layout_centerHorizontal="true"
-        android:text="获取版本信息失败"
         android:textStyle="italic"
         android:textColor="@color/white"
         android:layout_marginTop="4dp"

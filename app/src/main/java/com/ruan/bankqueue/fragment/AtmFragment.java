@@ -112,7 +112,7 @@ public class AtmFragment extends Fragment {
         //设置是否返回地址信息（默认返回地址信息）
         mLocationOption.setNeedAddress(true);
         //设置是否只定位一次,默认为false
-        mLocationOption.setOnceLocation(false);
+        mLocationOption.setOnceLocation(true);
         //设置是否强制刷新WIFI，默认为强制刷新
         mLocationOption.setWifiActiveScan(true);
         //设置是否允许模拟位置,默认为false，不允许模拟位置

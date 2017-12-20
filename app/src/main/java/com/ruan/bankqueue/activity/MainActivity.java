@@ -2,6 +2,8 @@ package com.ruan.bankqueue.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -69,6 +71,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         Fresco.initialize(this);
         setContentView(R.layout.activity_main);
+
+        if (Build.VERSION.SDK_INT >= 21) {
+            View decorView = getWindow().getDecorView();
+            int option = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+            decorView.setSystemUiVisibility(option);
+            getWindow().setNavigationBarColor(Color.TRANSPARENT);
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+        }
         ButterKnife.bind(this);
         context = getApplicationContext();
 //        创建AppVersion表
@@ -87,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toolbar.setTitle("");
         tvToolbar.setText("选择业务");
         setSupportActionBar(toolbar);
+
     }
     /**
      * 设置底部导航图片和图标，添加底部导航的点击事件

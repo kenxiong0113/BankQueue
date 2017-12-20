@@ -75,6 +75,7 @@ public class VersionActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
+
     @OnClick({R.id.tv_version_up})
     public void onClick(View view){
         switch (view.getId()){
@@ -113,10 +114,8 @@ public class VersionActivity extends BaseActivity {
                    initDate();
                    LogUtil.e("bmob","失败："+e.getMessage()+","+e.getErrorCode());
                    Toast.makeText(context, e.getMessage() + "," + e.getErrorCode(), Toast.LENGTH_SHORT).show();
-
                }
            }
        });
-
    }
 }
