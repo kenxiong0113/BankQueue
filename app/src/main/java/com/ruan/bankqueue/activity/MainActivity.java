@@ -2,6 +2,7 @@ package com.ruan.bankqueue.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -30,7 +31,6 @@ import com.ruan.bankqueue.R;
 import com.ruan.bankqueue.fragment.BusinessFragment;
 import com.ruan.bankqueue.fragment.MyFragment;
 import com.ruan.bankqueue.fragment.SubscribeFragment;
-import com.ruan.bankqueue.other.BaseConstants;
 import com.ruan.bankqueue.other.ExitPressed;
 
 import java.util.ArrayList;
@@ -71,18 +71,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         Fresco.initialize(this);
         setContentView(R.layout.activity_main);
-
-        if (Build.VERSION.SDK_INT >= 21) {
-            View decorView = getWindow().getDecorView();
-            int option = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
-            decorView.setSystemUiVisibility(option);
-            getWindow().setNavigationBarColor(Color.TRANSPARENT);
-            getWindow().setStatusBarColor(Color.TRANSPARENT);
+        context = getApplicationContext();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimaryStatus));
         }
         ButterKnife.bind(this);
-        context = getApplicationContext();
+
 //        创建AppVersion表
         // TODO: 2017/12/19 创建成功即清理此行
 //        BmobUpdateAgent.initAppVersion();
@@ -185,7 +179,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onTabUnselected(int position) {
-
         if (fragments != null) {
             if (position < fragments.size()) {
                 FragmentManager fm = getSupportFragmentManager();

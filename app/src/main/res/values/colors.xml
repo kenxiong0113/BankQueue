@@ -9,4 +9,5 @@
     <color name="black">#000000</color>
     <color name="gray">#BDBDBD</color>
     <color name="transparency">#00000000</color>
+    <color name="colorPrimaryStatus">#1976D2</color>
 </resources>

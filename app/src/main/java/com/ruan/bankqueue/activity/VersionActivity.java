@@ -3,11 +3,15 @@ package com.ruan.bankqueue.activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ruan.bankqueue.R;
+import com.ruan.bankqueue.other.BaseConstants;
 import com.ruan.bankqueue.util.LogUtil;
 
 import java.util.List;
@@ -38,8 +42,38 @@ public class VersionActivity extends BaseActivity {
     @BindView(R.id.tv_terms_of_service)
     TextView tvTermsOfService;
     Context context;
-    String versionId;
+    String versionId = null;
+    String ver;
+    @BindView(R.id.progress)
+    ProgressBar progress;
 
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                //网络获取版本号成功
+                case BaseConstants.VERSION_GET_SUCCESS_MESSAGE:
+                    if (versionId.equals(ver)) {
+                        Toast.makeText(context, "当前版本已经是最新版本", Toast.LENGTH_SHORT).show();
+                    } else {
+                        LogUtil.e("手动更新----", ver + "----" + versionId);
+                        BmobUpdateAgent.forceUpdate(context);
+                    }
+                    progress.setVisibility(View.GONE);
+                    break;
+                //网络获取版本号失败
+                case BaseConstants.VERSION_GET_FAIL_MESSAGE:
+                    if (versionId == null){
+                        Toast.makeText(context, "请检查当前网络环境", Toast.LENGTH_SHORT).show();
+                    }
+                    progress.setVisibility(View.GONE);
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
 
     @Override
     protected int getContentView() {
@@ -50,6 +84,7 @@ public class VersionActivity extends BaseActivity {
     protected void init(Bundle savedInstanceState) {
         ButterKnife.bind(this);
         context = getApplicationContext();
+        progress.setVisibility(View.VISIBLE);
         initToolbar();
         acquireVersionNumber();
 
@@ -65,9 +100,12 @@ public class VersionActivity extends BaseActivity {
         });
     }
 
-    private void initDate(){
-        SharedPreferences preferences = getSharedPreferences("version",MODE_PRIVATE);
-        String ver=  preferences.getString("number","");
+    /**
+     * 获取本地缓存版本号
+     */
+    private void getsTheLocalCacheVersionNumber() {
+        SharedPreferences preferences = getSharedPreferences("version", MODE_PRIVATE);
+        ver = preferences.getString("number", "");
         tvVersion.setText(ver);
     }
 
@@ -77,20 +115,24 @@ public class VersionActivity extends BaseActivity {
     }
 
     @OnClick({R.id.tv_version_up})
-    public void onClick(View view){
-        switch (view.getId()){
+    public void onClick(View view) {
+        switch (view.getId()) {
             case R.id.tv_version_up:
-                BmobUpdateAgent.forceUpdate(context);
+                progress.setVisibility(View.VISIBLE);
+                getsTheLocalCacheVersionNumber();
+                acquireVersionNumber();
                 break;
             default:
                 break;
         }
     }
+
     /**
      * 查询获取版本信息
      */
-   private void acquireVersionNumber(){
-       BmobQuery<AppVersion> query = new BmobQuery<AppVersion>();
+    private void acquireVersionNumber() {
+        final Message message = new Message();
+        BmobQuery<AppVersion> query = new BmobQuery<AppVersion>();
         //查询playerName叫“比目”的数据
         query.addWhereEqualTo("query", "ok");
         //返回50条数据，如果不加上这条语句，默认返回10条数据
@@ -99,23 +141,27 @@ public class VersionActivity extends BaseActivity {
         query.order("-createdAt");
         //执行查询方法
         query.findObjects(new FindListener<AppVersion>() {
-           @Override
-           public void done(List<AppVersion> object, BmobException e) {
-               if(e == null){
-                   for (AppVersion version : object) {
-                       //获得最新版本号的信息
-                       versionId = version.getVersion();
-                       tvVersion.setText(versionId);
-                       SharedPreferences.Editor preferences = getSharedPreferences("version",MODE_PRIVATE).edit();
-                       preferences.putString("number", versionId);
-                       preferences.apply();
+            @Override
+            public void done(List<AppVersion> object, BmobException e) {
+                if (e == null) {
+                    for (AppVersion version : object) {
+                        //获得最新版本号的信息
+                        versionId = version.getVersion();
+                        tvVersion.setText(versionId);
+                        message.what = BaseConstants.VERSION_GET_SUCCESS_MESSAGE;
+                        handler.sendMessage(message);
+                        SharedPreferences.Editor preferences = getSharedPreferences("version", MODE_PRIVATE).edit();
+                        preferences.putString("number", versionId);
+                        preferences.apply();
+
+                    }
+                } else {
+                    getsTheLocalCacheVersionNumber();
+                    message.what = BaseConstants.VERSION_GET_FAIL_MESSAGE;
+                    handler.sendMessage(message);
                    }
-               }else{
-                   initDate();
-                   LogUtil.e("bmob","失败："+e.getMessage()+","+e.getErrorCode());
-                   Toast.makeText(context, e.getMessage() + "," + e.getErrorCode(), Toast.LENGTH_SHORT).show();
-               }
-           }
-       });
-   }
+
+            }
+        });
+    }
 }

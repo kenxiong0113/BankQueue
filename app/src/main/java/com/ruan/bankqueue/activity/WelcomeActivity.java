@@ -15,7 +15,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.githang.statusbar.StatusBarCompat;
 import com.ruan.bankqueue.R;
 import com.ruan.bankqueue.javabean.WelcomePicture;
 import com.ruan.bankqueue.other.BaseConstants;
@@ -58,14 +57,14 @@ public class WelcomeActivity extends AppCompatActivity {
                 case BaseConstants.MESSAGE_NETWORK_REQUEST_IMAGE:
                     Bitmap bm = (Bitmap) msg.obj;
                     imgPicture.setImageBitmap(bm);
-                    message.what = BaseConstants.MESSAGE_REQUEST_IMAGE_SUCCEE;
+                    message.what = BaseConstants.MESSAGE_REQUEST_IMAGE_SUCCESS;
                     handler.sendMessage(message);
                     break;
-                case BaseConstants.MESSAGE_REQUEST_IMAGE_SUCCEE:
+                case BaseConstants.MESSAGE_REQUEST_IMAGE_SUCCESS:
                     progress.setVisibility(View.GONE);
                     jump();
                     break;
-                case BaseConstants.MESSAGE_REQUEST_IMAGE_FAILEURE:
+                case BaseConstants.MESSAGE_REQUEST_IMAGE_FAIL:
                     progress.setVisibility(View.GONE);
                     checkTheUserCache();
                     Toast.makeText(context, "加载图片失败", Toast.LENGTH_SHORT).show();
@@ -149,7 +148,7 @@ public class WelcomeActivity extends AppCompatActivity {
                             t.start();
                             //调用bmobfile.download方法
                         } else {
-                            message.what = BaseConstants.MESSAGE_REQUEST_IMAGE_FAILEURE;
+                            message.what = BaseConstants.MESSAGE_REQUEST_IMAGE_FAIL;
                             handler.sendMessage(message);
                         }
                     }

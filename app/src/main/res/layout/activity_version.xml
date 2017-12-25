@@ -5,6 +5,10 @@
     android:layout_height="match_parent"
     android:background="@mipmap/version">
 
+    <ProgressBar
+        style="@style/ProgressBar"
+        android:id="@+id/progress"
+        />
 
     <ImageView
         android:id="@+id/img_logo"
