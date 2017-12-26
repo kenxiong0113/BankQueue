@@ -2,6 +2,9 @@
     <string name="app_name">Bank优排</string>
     <string name="title_business">业务</string>
     <string name="title_subscribe">预约</string>
+    <string name="title_atm">ATM</string>
+    <string name="title_queue">排队</string>
+
     <string name="title_my">待定</string>
     <string name="exit">退出登录</string>
     <string name="my_info">我的资料</string>

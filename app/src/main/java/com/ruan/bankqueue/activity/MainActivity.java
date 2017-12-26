@@ -2,8 +2,6 @@ package com.ruan.bankqueue.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -28,8 +26,9 @@ import com.ashokvarma.bottomnavigation.BottomNavigationItem;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.ruan.bankqueue.R;
+import com.ruan.bankqueue.fragment.AtmFragment;
 import com.ruan.bankqueue.fragment.BusinessFragment;
-import com.ruan.bankqueue.fragment.MyFragment;
+import com.ruan.bankqueue.fragment.QueueFragment;
 import com.ruan.bankqueue.fragment.SubscribeFragment;
 import com.ruan.bankqueue.other.ExitPressed;
 
@@ -44,8 +43,8 @@ import cn.bmob.v3.update.BmobUpdateAgent;
  * @author by ruan
  */
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, BottomNavigationBar.OnTabSelectedListener {
-    BusinessFragment businessFragment;
-    MyFragment myFragment;
+    AtmFragment atmFragment;
+    QueueFragment queueFragment;
     SubscribeFragment subscribeFragment;
 
     @BindView(R.id.nav_view)
@@ -91,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void initToolbar(){
         toolbar.setTitle("");
-        tvToolbar.setText("选择业务");
+        tvToolbar.setText("附近ATM");
         setSupportActionBar(toolbar);
 
     }
@@ -101,9 +100,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void initBottomNavigationBar() {
         navigation.setMode(BottomNavigationBar.MODE_FIXED);
         navigation.setBackgroundStyle(BottomNavigationBar.BACKGROUND_STYLE_STATIC);
-        navigation.addItem(new BottomNavigationItem(R.drawable.ic_business, getString(R.string.title_business)).setActiveColorResource(R.color.bottomBar))
+        navigation.addItem(new BottomNavigationItem(R.drawable.ic_atm_bar, getString(R.string.title_atm)).setActiveColorResource(R.color.bottomBar))
+                .addItem(new BottomNavigationItem(R.drawable.ic_queue, getString(R.string.title_queue)).setActiveColorResource(R.color.bottomBar))
                 .addItem(new BottomNavigationItem(R.drawable.ic_subscribe, getString(R.string.title_subscribe)).setActiveColorResource(R.color.bottomBar))
-                .addItem(new BottomNavigationItem(R.drawable.ic_my, getString(R.string.title_my)).setActiveColorResource(R.color.bottomBar))
                 .setFirstSelectedPosition(0)
                 .initialise();
         setDefaultFragment();
@@ -135,8 +134,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void setDefaultFragment() {
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction transaction = fm.beginTransaction();
-        businessFragment = BusinessFragment.newInstance(getString(R.string.title_business));
-        transaction.replace(R.id.content, businessFragment);
+        atmFragment = AtmFragment.newInstance(getString(R.string.title_atm));
+        transaction.replace(R.id.content, atmFragment);
         transaction.commit();
 
     }
@@ -153,20 +152,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         FragmentTransaction transaction = fm.beginTransaction();
         switch (position) {
             case 0:
-                businessFragment = BusinessFragment.newInstance(getString(R.string.title_business));
-                tvToolbar.setText("选择业务");
-                transaction.replace(R.id.content, businessFragment);
+                atmFragment = AtmFragment.newInstance(getString(R.string.title_atm));
+                tvToolbar.setText("附近ATM");
+                transaction.replace(R.id.content, atmFragment);
                 break;
             case 1:
-                subscribeFragment = SubscribeFragment.newInstance(getString(R.string.title_subscribe));
-                tvToolbar.setText(getString(R.string.title_subscribe));
-                transaction.replace(R.id.content, subscribeFragment);
+                queueFragment = QueueFragment.newInstance(getString(R.string.title_queue));
+                tvToolbar.setText(getString(R.string.title_queue));
+                transaction.replace(R.id.content, queueFragment);
                 break;
             case 2:
 
-                myFragment = MyFragment.newInstance(getString(R.string.title_my));
-                tvToolbar.setText(getString(R.string.title_my));
-                transaction.replace(R.id.content, myFragment);
+                subscribeFragment = SubscribeFragment.newInstance(getString(R.string.title_subscribe));
+                tvToolbar.setText(getString(R.string.title_subscribe));
+                transaction.replace(R.id.content, subscribeFragment);
                 break;
 
             default:

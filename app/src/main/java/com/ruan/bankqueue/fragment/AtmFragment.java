@@ -1,7 +1,7 @@
 package com.ruan.bankqueue.fragment;
 
 import android.Manifest;
-import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,7 +9,6 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,26 +19,25 @@ import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
-import com.amap.api.maps.MapView;
 import com.amap.api.maps.TextureMapView;
 import com.amap.api.maps.model.BitmapDescriptor;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
-import com.amap.api.maps.model.CameraPosition;
 import com.amap.api.maps.model.LatLng;
+import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.core.PoiItem;
+import com.amap.api.services.core.SuggestionCity;
 import com.amap.api.services.poisearch.PoiResult;
 import com.amap.api.services.poisearch.PoiSearch;
-import com.google.gson.Gson;
 import com.ruan.bankqueue.R;
 import com.ruan.bankqueue.other.BaseConstants;
+import com.ruan.bankqueue.overlay.PoiOverlay;
 import com.ruan.bankqueue.util.LogUtil;
-
-import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -51,7 +49,8 @@ import static cn.bmob.v3.Bmob.getApplicationContext;
  * @author by ruan on 2017/12/16.
  */
 
-public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListener {
+public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListener,
+        AMap.OnMarkerClickListener ,AMap.InfoWindowAdapter,AMap.OnInfoWindowClickListener{
     View view;
     static String ARG = "arg";
     @BindView(R.id.map_view)
@@ -67,7 +66,6 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
     /**
      * 声明mLocationOption对象
      */
-
     public AMapLocationClientOption mLocationOption = null;
     private double lat;
     private double lon;
@@ -172,13 +170,6 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
         super.onStop();
         mLocationClient.stopLocation();//停止定位
     }
-
-    @Override
-    public void onDestroy() {
-        //保存地图状态
-        super.onDestroy();
-    }
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -242,10 +233,11 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
                     aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 15.5f));
                     MarkerOptions markerOptions = new MarkerOptions();
                     markerOptions.position(new LatLng(lat, lon));
-                    markerOptions.title("当前位置");
-                    BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_direction));
-                    markerOptions.icon(bitmapDescriptor);
+                    markerOptions.title("我的位置");
                     markerOptions.visible(true);
+                    BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(
+                            BitmapFactory.decodeResource(getResources(), R.drawable.ic_byg_location));
+                    markerOptions.icon(bitmapDescriptor);
                     aMap.addMarker(markerOptions);
 
                     // 完成定位发送消息，默认搜索ATM
@@ -269,9 +261,9 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
         PoiSearch poiSearch = new PoiSearch(getActivity(),query);
         poiSearch.setOnPoiSearchListener(this);
         poiSearch.searchPOIAsyn();
-        // TODO: 2017/12/25  设置周边搜索的中心点以及半径 暂设置为10公里范围内
+        // TODO: 2017/12/25  设置周边搜索的中心点以及半径 暂设置为5公里范围内
         poiSearch.setBound(new PoiSearch.SearchBound(new LatLonPoint(lat,
-                lon), 8000));
+                lon), 5000));
     }
 
     /**
@@ -281,28 +273,37 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
      */
     @Override
     public void onPoiSearched(PoiResult poiResult, int i) {
-//        LogUtil.e("AtmFragment", "poiResult.getPois():----" + poiResult.getPois());
-//        String object =  new Gson().toJson(poiResult.getBound());
-//        LogUtil.e("AtmFragment", "poiResult.getBound():" + object);
         // TODO: 2017/12/25 在地图上面显示兴趣点
-        MarkerOptions marker = new MarkerOptions();
-        for (int k = 0;k <= poiResult.getPois().size();k++){
-            double atmLat,atmLon;
-            atmLon = poiResult.getPois().get(k).getLatLonPoint().getLatitude();
-            atmLat = poiResult.getPois().get(k).getLatLonPoint().getLongitude();
-            LogUtil.e("AtmFragment----", "经度 ：" + atmLat);
-            LogUtil.e("AtmFragment----", "纬度 ：" + atmLon);
-            marker.position(new LatLng(atmLat,atmLon));
-            marker.title("ATM");
-            BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_atm));
-            marker.icon(bitmapDescriptor);
-            marker.visible(true);
-            aMap.addMarker(marker).setClickable(true);
+        if (i == BaseConstants.CODE_AMAP_SUCCESS){
+
+            List<PoiItem> poiItems = poiResult.getPois();
+            // 当搜索不到poiitem数据时，会返回含有搜索关键字的城市信息
+            List<SuggestionCity> suggestionCities = poiResult.getSearchSuggestionCitys();
+            if (poiItems != null && poiItems.size() > 0) {
+                // 清理之前的图标
+                aMap.clear();
+                PoiOverlay poiOverlay = new PoiOverlay(aMap, poiItems);
+                poiOverlay.removeFromMap();
+                poiOverlay.zoomToSpan();
+
+            }
+            // TODO: 2017/12/26 点击地图兴趣点，显示乱码，等待处理
+            for (int j = 0; j < poiResult.getPois().size(); j++) {
+                View view = View.inflate(getActivity(),R.layout.view_atm, null);
+                Bitmap bitmap = convertViewToBitmap(view);
+                drawMarkerOnMap(new LatLng(poiResult.getPois().get(j).getLatLonPoint().getLatitude(),
+                                poiResult.getPois().get(j).getLatLonPoint().getLongitude()),
+                        bitmap, poiResult.getPois().get(j).getPoiId());
+            }
+        }else {
+            LogUtil.e("AtmFragment", "i:" + i);
         }
+
     }
 
     @Override
     public void onPoiItemSearched(PoiItem poiItem, int i) {
+        // TODO: 2017/12/26 搜索poi定位回调信息
 //        LogUtil.e("AtmFragment", "----" + poiItem.getCityCode());
 
     }
@@ -321,5 +322,54 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
 
         }
     };
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        return false;
+    }
+    /**
+     * @param view 转 Bitmap
+     * @return
+     */
+    public static Bitmap convertViewToBitmap(View view) {
+        view.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
+        view.buildDrawingCache();
+        Bitmap bitmap = view.getDrawingCache();
+        return bitmap;
+    }
+
+    /**
+     * 在地图上画marker
+     * @param point
+     * @param markerIcon 图标
+     * @return Marker对象
+     */
+    private Marker drawMarkerOnMap(LatLng point, Bitmap markerIcon, String id) {
+        if (aMap != null && point != null) {
+            Marker marker = aMap.addMarker(new MarkerOptions().anchor(0.5f, 1)
+                    .position(point)
+                    .title(id)
+                    .icon(BitmapDescriptorFactory.fromBitmap(markerIcon)));
+            return marker;
+        }
+        return null;
+    }
+
+    @Override
+    public View getInfoWindow(Marker marker) {
+        return null;
+    }
+
+    @Override
+    public View getInfoContents(Marker marker) {
+        return null;
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+
+    }
 }
 
