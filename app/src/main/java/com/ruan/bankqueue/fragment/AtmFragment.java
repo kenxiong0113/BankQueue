@@ -3,21 +3,30 @@ package com.ruan.bankqueue.fragment;
 import android.Manifest;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
+import com.amap.api.maps.AMapUtils;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.TextureMapView;
 import com.amap.api.maps.model.BitmapDescriptor;
@@ -27,7 +36,6 @@ import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.core.PoiItem;
-import com.amap.api.services.core.SuggestionCity;
 import com.amap.api.services.poisearch.PoiResult;
 import com.amap.api.services.poisearch.PoiSearch;
 import com.ruan.bankqueue.R;
@@ -50,7 +58,7 @@ import static cn.bmob.v3.Bmob.getApplicationContext;
  */
 
 public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListener,
-        AMap.OnMarkerClickListener ,AMap.InfoWindowAdapter,AMap.OnInfoWindowClickListener{
+        AMap.OnMarkerClickListener ,AMap.InfoWindowAdapter,AMap.OnInfoWindowClickListener,View.OnClickListener{
     View view;
     static String ARG = "arg";
     @BindView(R.id.map_view)
@@ -58,6 +66,11 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
     Message message = new Message();
     String city = null;
     String cityCode = null;
+    TextView tvTitle;
+    PopupWindow popupWindow;
+    boolean isPopupWindowShow;
+    LinearLayout layout;
+    View viewAtm;
     private AMap aMap;
     /**
      *   声明AMapLocationClient类对象
@@ -96,8 +109,8 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
         mLocationClient = new AMapLocationClient(getApplicationContext());
         //设置定位回调监听
         mLocationClient.setLocationListener(mLocationListener);
-
         init();
+//        setMapAttributeListener();
         return view;
     }
 
@@ -117,6 +130,20 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
     private void checkThePermissions(){
         ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.CHANGE_WIFI_STATE}, 3);
+    }
+
+    /**
+     * 设置Map属性和监听事件
+     */
+    private void setMapAttributeListener(){
+        // 设置默认定位按钮是否显示
+        aMap.getUiSettings().setMyLocationButtonEnabled(true);
+        // 设置点击marker事件监听器
+        aMap.setOnMarkerClickListener(this);
+        // 设置点击infoWindow事件监听器
+//        aMap.setOnInfoWindowClickListener(this);
+//        // 设置自定义InfoWindow样式
+//        aMap.setInfoWindowAdapter(this);
     }
 
     /**
@@ -275,26 +302,25 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
     public void onPoiSearched(PoiResult poiResult, int i) {
         // TODO: 2017/12/25 在地图上面显示兴趣点
         if (i == BaseConstants.CODE_AMAP_SUCCESS){
-
             List<PoiItem> poiItems = poiResult.getPois();
-            // 当搜索不到poiitem数据时，会返回含有搜索关键字的城市信息
-            List<SuggestionCity> suggestionCities = poiResult.getSearchSuggestionCitys();
             if (poiItems != null && poiItems.size() > 0) {
                 // 清理之前的图标
-                aMap.clear();
+//                aMap.clear();
                 PoiOverlay poiOverlay = new PoiOverlay(aMap, poiItems);
                 poiOverlay.removeFromMap();
                 poiOverlay.zoomToSpan();
 
             }
-            // TODO: 2017/12/26 点击地图兴趣点，显示乱码，等待处理
             for (int j = 0; j < poiResult.getPois().size(); j++) {
-                View view = View.inflate(getActivity(),R.layout.view_atm, null);
-                Bitmap bitmap = convertViewToBitmap(view);
+                viewAtm = View.inflate(getActivity(),R.layout.view_atm, null);
+                tvTitle = (TextView)viewAtm.findViewById(R.id.tv_title);
+                Bitmap bitmap = convertViewToBitmap(viewAtm);
                 drawMarkerOnMap(new LatLng(poiResult.getPois().get(j).getLatLonPoint().getLatitude(),
                                 poiResult.getPois().get(j).getLatLonPoint().getLongitude()),
-                        bitmap, poiResult.getPois().get(j).getPoiId());
+                        bitmap, poiResult.getPois().get(j).getTitle());
+
             }
+            setMapAttributeListener();
         }else {
             LogUtil.e("AtmFragment", "i:" + i);
         }
@@ -323,10 +349,22 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
         }
     };
 
+    /**
+     * 地图自定义marker点击事件
+     * @param marker
+     * @return
+     */
     @Override
     public boolean onMarkerClick(Marker marker) {
-        return false;
+        //计算两点之间的距离，并保留两位小数
+        float distance = AMapUtils.calculateLineDistance(new LatLng(lat,lon),new LatLng(marker.getPosition().latitude,marker.getPosition().longitude));
+        LogUtil.e("AtmFragment----", "distance:" + distance);
+        float  b   =  (float)(Math.round(distance/10))/100;
+        bottomWindow(viewAtm,marker.getTitle(), String.valueOf(b));
+        isPopupWindowShow = true;
+        return isPopupWindowShow;
     }
+
     /**
      * @param view 转 Bitmap
      * @return
@@ -346,11 +384,11 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
      * @param markerIcon 图标
      * @return Marker对象
      */
-    private Marker drawMarkerOnMap(LatLng point, Bitmap markerIcon, String id) {
+    private Marker drawMarkerOnMap(LatLng point, Bitmap markerIcon, String title) {
         if (aMap != null && point != null) {
             Marker marker = aMap.addMarker(new MarkerOptions().anchor(0.5f, 1)
                     .position(point)
-                    .title(id)
+                    .title(title)
                     .icon(BitmapDescriptorFactory.fromBitmap(markerIcon)));
             return marker;
         }
@@ -369,7 +407,72 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
 
     @Override
     public void onInfoWindowClick(Marker marker) {
+        LogUtil.e("AtmFragment----", marker.getTitle());
+    }
 
+
+    void bottomWindow(View view,String poi,String distance) {
+        if (popupWindow != null && popupWindow.isShowing()) {
+            return;
+        }
+        layout = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.window_popup_picture, null);
+        popupWindow = new PopupWindow(layout,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        setButtonListeners(layout,poi,distance);
+        dismissPopupWindow(view, layout);
+    }
+
+    /**
+     * 初始化底部弹出窗口控件
+     * @param layout
+     */
+    public void setButtonListeners(LinearLayout layout,String poi,String distance) {
+        TextView tvPoiAtm = (TextView) layout.findViewById(R.id.tv_poi_atm);
+        TextView tvDistance = (TextView) layout.findViewById(R.id.tv_distance);
+        Button route = (Button) layout.findViewById(R.id.btn_route);
+        Button navigation = (Button) layout.findViewById(R.id.btn_navigation);
+        route.setOnClickListener(this);
+        navigation.setOnClickListener(this);
+
+        tvPoiAtm.setText(poi);
+        tvDistance.setText("距您"+distance+"公里");
+    }
+
+    /**
+     * 点击空白处时，隐藏掉pop窗口
+     */
+    public void dismissPopupWindow(View view, final LinearLayout layout) {
+        if (isPopupWindowShow){
+            popupWindow.setFocusable(true);
+            popupWindow.setBackgroundDrawable(new BitmapDrawable());
+            popupWindow.setAnimationStyle(R.style.Popupwindow);
+            int[] location = new int[2];
+            view.getLocationOnScreen(location);
+            popupWindow.showAtLocation(view, Gravity.LEFT | Gravity.BOTTOM, 0, -location[1]);
+            popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                @Override
+                public void onDismiss() {
+
+                }
+            });
+        }
+
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.btn_route:
+
+                break;
+            case R.id.btn_navigation:
+
+                break;
+            default:
+                break;
+
+        }
     }
 }
 
