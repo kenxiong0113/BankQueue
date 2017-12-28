@@ -155,6 +155,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 atmFragment = AtmFragment.newInstance(getString(R.string.title_atm));
                 tvToolbar.setText("附近ATM");
                 transaction.replace(R.id.content, atmFragment);
+
                 break;
             case 1:
                 queueFragment = QueueFragment.newInstance(getString(R.string.title_queue));

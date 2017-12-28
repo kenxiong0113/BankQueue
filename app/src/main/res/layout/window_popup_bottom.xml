@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/tv_poi_atm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="兴趣点"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_margin="8dp"
+            />
+
+        <TextView
+            android:id="@+id/tv_distance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="距离" />
+
+    </LinearLayout>
+
+
+
+    <View
+    android:layout_width="match_parent"
+    android:layout_height="1dp"
+    android:background="@color/gray"
+    />
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/lay_route"
+            android:clickable="true"
+            android:layout_weight="1">
+
+            <Button
+                android:id="@+id/btn_route"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:background="@color/transparency"
+                android:layout_centerHorizontal="true"
+                android:text="路线"
+                android:clickable="false"/>
+
+            <ImageView
+                android:id="@+id/img_route"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ic_route"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@+id/btn_route"
+                android:clickable="false"
+                />
+
+        </RelativeLayout>
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/gray"
+            />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/lay_navigation"
+            android:clickable="true"
+            >
+
+            <Button
+                android:id="@+id/btn_navigation"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:background="@color/transparency"
+                android:layout_centerHorizontal="true"
+                android:text="导航"
+                android:clickable="false"/>
+
+            <ImageView
+                android:id="@+id/img_navigation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ic_navigation"
+                android:layout_centerVertical="true"
+                android:clickable="false"
+                android:layout_toStartOf="@+id/btn_navigation"
+                />
+        </RelativeLayout>
+
+    </LinearLayout>
+</LinearLayout>

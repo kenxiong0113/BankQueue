@@ -1,4 +1,4 @@
-package com.ruan.bankqueue.overlay;
+package com.ruan.overlay;
 
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
@@ -15,7 +15,6 @@ import java.util.List;
 /**
  * Poi图层类。在高德地图API里，如果要显示Poi，可以用此类来创建Poi图层。如不满足需求，也可以自己创建自定义的Poi图层。
  * @since V2.1.0
- * @author by ruan
  */
 public class PoiOverlay {
 	private List<PoiItem> mPois;
@@ -62,7 +61,7 @@ public class PoiOverlay {
 	public void zoomToSpan() {
 		try{
 			if (mPois != null && mPois.size() > 0) {
-				if (mAMap == null){
+				if (mAMap == null) {
 					return;
 				}
 				if(mPois.size()==1){

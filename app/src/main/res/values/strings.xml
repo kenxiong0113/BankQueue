@@ -9,4 +9,8 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="copyright">Copyright Bank优排 © 2017-2017 . All Rights Reserved.</string>
+
+
+    <!--高德地图相关-->
+    <string name="no_result">对不起，没有搜索到相关数据！</string>
 </resources>

@@ -1,8 +1,8 @@
 package com.ruan.bankqueue.fragment;
 
 import android.Manifest;
+import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,9 +15,9 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,19 +29,28 @@ import com.amap.api.maps.AMap;
 import com.amap.api.maps.AMapUtils;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.TextureMapView;
-import com.amap.api.maps.model.BitmapDescriptor;
+import com.amap.api.maps.UiSettings;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
+import com.amap.api.maps.model.MyLocationStyle;
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.core.PoiItem;
 import com.amap.api.services.poisearch.PoiResult;
 import com.amap.api.services.poisearch.PoiSearch;
+import com.amap.api.services.route.BusRouteResult;
+import com.amap.api.services.route.DriveRouteResult;
+import com.amap.api.services.route.RideRouteResult;
+import com.amap.api.services.route.RouteSearch;
+import com.amap.api.services.route.WalkRouteResult;
 import com.ruan.bankqueue.R;
 import com.ruan.bankqueue.other.BaseConstants;
-import com.ruan.bankqueue.overlay.PoiOverlay;
+import com.ruan.bankqueue.routePlanning.Route;
+import com.ruan.bankqueue.util.AMapUtil;
 import com.ruan.bankqueue.util.LogUtil;
+import com.ruan.bankqueue.util.ToastUtil;
+import com.ruan.overlay.PoiOverlay;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -58,7 +67,8 @@ import static cn.bmob.v3.Bmob.getApplicationContext;
  */
 
 public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListener,
-        AMap.OnMarkerClickListener ,AMap.InfoWindowAdapter,AMap.OnInfoWindowClickListener,View.OnClickListener{
+        AMap.OnMarkerClickListener ,AMap.InfoWindowAdapter,AMap.OnInfoWindowClickListener,
+        View.OnClickListener,RouteSearch.OnRouteSearchListener,Route.CallBack{
     View view;
     static String ARG = "arg";
     @BindView(R.id.map_view)
@@ -67,11 +77,21 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
     String city = null;
     String cityCode = null;
     TextView tvTitle;
+    TextView tvPoiAtm;
+    TextView tvDistance;
     PopupWindow popupWindow;
     boolean isPopupWindowShow;
     LinearLayout layout;
     View viewAtm;
+    Context mContext;
     private AMap aMap;
+    private LatLonPoint startPoint;
+    private LatLonPoint endPoint;
+    private RouteSearch mRouteSearch;
+    private UiSettings uiSettings;
+    private WalkRouteResult mWalkRouteResult;
+    MyLocationStyle myLocation;
+
     /**
      *   声明AMapLocationClient类对象
      */
@@ -100,17 +120,16 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_atm, container, false);
-
         unbinder = ButterKnife.bind(this, view);
-        textureMapView.onCreate(savedInstanceState);
-        checkThePermissions();
         //在activity执行onCreate时执行mMapView.onCreate(savedInstanceState)，实现地图生命周期管理
+        textureMapView.onCreate(savedInstanceState);
+        mContext = getApplicationContext();
+        checkThePermissions();
         //初始化定位
         mLocationClient = new AMapLocationClient(getApplicationContext());
         //设置定位回调监听
         mLocationClient.setLocationListener(mLocationListener);
         init();
-//        setMapAttributeListener();
         return view;
     }
 
@@ -121,6 +140,9 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
         if (aMap == null) {
             aMap = textureMapView.getMap();
         }
+        mRouteSearch = new RouteSearch(getActivity());
+        mRouteSearch.setRouteSearchListener(this);
+        uiSettings = aMap.getUiSettings();
         setUpMap();
     }
 
@@ -137,14 +159,21 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
      */
     private void setMapAttributeListener(){
         // 设置默认定位按钮是否显示
-        aMap.getUiSettings().setMyLocationButtonEnabled(true);
+        uiSettings.setMyLocationButtonEnabled(true);
+        // 是否可触发定位并显示定位层
+        aMap.setMyLocationEnabled(true);
         // 设置点击marker事件监听器
         aMap.setOnMarkerClickListener(this);
         // 设置点击infoWindow事件监听器
-//        aMap.setOnInfoWindowClickListener(this);
-//        // 设置自定义InfoWindow样式
-//        aMap.setInfoWindowAdapter(this);
+        aMap.setOnInfoWindowClickListener(this);
+        // 设置自定义InfoWindow样式
+        aMap.setInfoWindowAdapter(this);
+
+
     }
+
+
+
 
     /**
      * 配置定位参数
@@ -182,8 +211,9 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
     @Override
     public void onResume() {
         super.onResume();
+//        textureMapView.onResume();
         //在activity执行onResume时执行mMapView.onResume ()，实现地图生命周期管理
-        textureMapView.onResume();
+
     }
     @Override
     public void onPause() {
@@ -197,6 +227,7 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
         super.onStop();
         mLocationClient.stopLocation();//停止定位
     }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -219,33 +250,16 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
             String time = "yyyy-MM-dd HH:mm:ss";
             if (amapLocation != null) {
                 if (amapLocation.getErrorCode() == 0) {
-                    //定位成功回调信息，设置相关消息
-                    amapLocation.getLocationType();//获取当前定位结果来源，如网络定位结果，详见定位类型表
-                    amapLocation.getLatitude();//获取纬度
-                    amapLocation.getLongitude();//获取经度
-                    amapLocation.getAccuracy();//获取精度信息
                     SimpleDateFormat df = new SimpleDateFormat(time);
                     Date date = new Date(amapLocation.getTime());
                     //定位时间
                     df.format(date);
-                    //地址，如果option中设置isNeedAddress为false，则没有此结果，
-                    // 网络定位结果中会有地址信息，GPS定位不返回地址信息。
-                    amapLocation.getAddress();
-                    amapLocation.getCountry();//国家信息
-                    amapLocation.getProvince();//省信息
-                    amapLocation.getCity();//城市信息
-                    amapLocation.getDistrict();//城区信息
-                    amapLocation.getStreet();//街道信息
-                    amapLocation.getStreetNum();//街道门牌号信息
-                    amapLocation.getCityCode();//城市编码
-                    amapLocation.getAdCode();//地区编码
-                    amapLocation.getAoiName();//获取当前定位点的AOI信息
+                    //获取纬度
                     lat = amapLocation.getLatitude();
+                    //获取经度
                     lon = amapLocation.getLongitude();
                     city = amapLocation.getCity();
                     cityCode = amapLocation.getCityCode();
-
-
                     LogUtil.e("pcw----", "lat : " + lat + " lon : " + lon);
                     LogUtil.e("pcw----", " Country : " + amapLocation.getCountry() +
                             " province : " + amapLocation.getProvince() +
@@ -255,17 +269,23 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
                             " CityCode : " + amapLocation.getCityCode()+
                             " AdCode : " + amapLocation.getAdCode()
                     );
-
+                    startPoint = new LatLonPoint(lat,lon);
                     // 设置当前地图显示为当前位置
                     aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 15.5f));
-                    MarkerOptions markerOptions = new MarkerOptions();
-                    markerOptions.position(new LatLng(lat, lon));
-                    markerOptions.title("我的位置");
-                    markerOptions.visible(true);
-                    BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(
-                            BitmapFactory.decodeResource(getResources(), R.drawable.ic_byg_location));
-                    markerOptions.icon(bitmapDescriptor);
-                    aMap.addMarker(markerOptions);
+                    myLocation = new MyLocationStyle();
+                    //初始化定位蓝点样式类myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE);
+                    // 连续定位、且将视角移动到地图中心点，
+                    // 定位点依照设备方向旋转，并且会跟随设备移动。（1秒1次定位）如果不设置myLocationType，默认也会执行此种模式。
+                    myLocation.myLocationType(MyLocationStyle.LOCATION_TYPE_MAP_ROTATE_NO_CENTER);
+                    //设置连续定位模式下的定位间隔，只在连续定位模式下生效，单次定位模式下不会生效。单位为毫秒。
+                    myLocation.interval(1000);
+                    aMap.setMyLocationStyle(myLocation);
+                    // 设置为true表示启动显示定位蓝点，false表示隐藏定位蓝点并不进行定位，默认是false。
+                    aMap.setMyLocationEnabled(true);
+//                    BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(
+//                            BitmapFactory.decodeResource(getResources(), R.drawable.ic_byg_location));
+//                    myLocation.myLocationIcon(bitmapDescriptor);
+//                    myLocation.showMyLocation(true);
 
                     // 完成定位发送消息，默认搜索ATM
                     message.what = BaseConstants.POI_SEARCH_ATM;
@@ -304,8 +324,7 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
         if (i == BaseConstants.CODE_AMAP_SUCCESS){
             List<PoiItem> poiItems = poiResult.getPois();
             if (poiItems != null && poiItems.size() > 0) {
-                // 清理之前的图标
-//                aMap.clear();
+                // TODO: 2017/12/28 搜索完兴趣点，是否清楚之前的图标 ，aMap.clean;
                 PoiOverlay poiOverlay = new PoiOverlay(aMap, poiItems);
                 poiOverlay.removeFromMap();
                 poiOverlay.zoomToSpan();
@@ -356,13 +375,20 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
      */
     @Override
     public boolean onMarkerClick(Marker marker) {
-        //计算两点之间的距离，并保留两位小数
-        float distance = AMapUtils.calculateLineDistance(new LatLng(lat,lon),new LatLng(marker.getPosition().latitude,marker.getPosition().longitude));
-        LogUtil.e("AtmFragment----", "distance:" + distance);
-        float  b   =  (float)(Math.round(distance/10))/100;
-        bottomWindow(viewAtm,marker.getTitle(), String.valueOf(b));
-        isPopupWindowShow = true;
-        return isPopupWindowShow;
+        String title = null;
+        title = marker.getTitle();
+        if (marker.getTitle() == null){
+            title = "我的位置";
+        }
+            //计算两点之间的距离，并保留两位小数
+            float distance = AMapUtils.calculateLineDistance(new LatLng(lat, lon), new LatLng(marker.getPosition().latitude, marker.getPosition().longitude));
+            LogUtil.e("AtmFragment----", "distance:" + distance);
+            float b = (float) (Math.round(distance / 10)) / 100;
+            bottomWindow(viewAtm, title, String.valueOf(b));
+            isPopupWindowShow = true;
+            endPoint = new LatLonPoint(marker.getPosition().latitude, marker.getPosition().longitude);
+            return isPopupWindowShow;
+
     }
 
     /**
@@ -415,7 +441,7 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
         if (popupWindow != null && popupWindow.isShowing()) {
             return;
         }
-        layout = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.window_popup_picture, null);
+        layout = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.window_popup_bottom, null);
         popupWindow = new PopupWindow(layout,
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -428,13 +454,12 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
      * @param layout
      */
     public void setButtonListeners(LinearLayout layout,String poi,String distance) {
-        TextView tvPoiAtm = (TextView) layout.findViewById(R.id.tv_poi_atm);
-        TextView tvDistance = (TextView) layout.findViewById(R.id.tv_distance);
-        Button route = (Button) layout.findViewById(R.id.btn_route);
-        Button navigation = (Button) layout.findViewById(R.id.btn_navigation);
-        route.setOnClickListener(this);
-        navigation.setOnClickListener(this);
-
+        tvPoiAtm = (TextView) layout.findViewById(R.id.tv_poi_atm);
+        tvDistance = (TextView) layout.findViewById(R.id.tv_distance);
+        RelativeLayout layRoute = (RelativeLayout)layout.findViewById(R.id.lay_route);
+        RelativeLayout layNavigation = (RelativeLayout)layout.findViewById(R.id.lay_navigation);
+        layRoute.setOnClickListener(this);
+        layNavigation.setOnClickListener(this);
         tvPoiAtm.setText(poi);
         tvDistance.setText("距您"+distance+"公里");
     }
@@ -443,7 +468,6 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
      * 点击空白处时，隐藏掉pop窗口
      */
     public void dismissPopupWindow(View view, final LinearLayout layout) {
-        if (isPopupWindowShow){
             popupWindow.setFocusable(true);
             popupWindow.setBackgroundDrawable(new BitmapDrawable());
             popupWindow.setAnimationStyle(R.style.Popupwindow);
@@ -456,23 +480,85 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
 
                 }
             });
-        }
 
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()){
-            case R.id.btn_route:
-
+            case R.id.lay_route:
+                    setFromAndToMarker();
+                    searchRouteResult(3,0);
                 break;
-            case R.id.btn_navigation:
-
+            case R.id.lay_navigation:
+                Toast.makeText(getActivity(), "点击了导航按钮", Toast.LENGTH_SHORT).show();
                 break;
             default:
                 break;
+        }
+    }
+
+    /**
+     * 设置步行路线的起止点
+      */
+    private void setFromAndToMarker() {
+        LogUtil.e("AtmFragment", "startPoint:----" + startPoint);
+        aMap.addMarker(new MarkerOptions()
+                .position(AMapUtil.convertToLatLng(startPoint))
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_start)));
+        aMap.addMarker(new MarkerOptions()
+                .position(AMapUtil.convertToLatLng(endPoint))
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_end)));
+    }
+
+    /**
+     * 开始搜索步行路径规划方案
+     */
+    public void searchRouteResult(int routeType, int mode) {
+        if (startPoint == null) {
+            ToastUtil.show(getActivity(), "定位中，稍后再试...");
+            return;
+        }
+        if (endPoint == null) {
+            ToastUtil.show(getActivity(), "终点未设置");
+        }
+
+        final RouteSearch.FromAndTo fromAndTo = new RouteSearch.FromAndTo(
+                startPoint, endPoint);
+        // 步行路径规划
+        if (routeType == BaseConstants.ROUTE_TYPE_WALK) {
+            RouteSearch.WalkRouteQuery query = new RouteSearch.WalkRouteQuery(fromAndTo, mode);
+            // 异步路径规划步行模式查询
+            mRouteSearch.calculateWalkRouteAsyn(query);
 
         }
+    }
+
+    @Override
+    public void onBusRouteSearched(BusRouteResult busRouteResult, int i) {
+
+    }
+
+    @Override
+    public void onDriveRouteSearched(DriveRouteResult driveRouteResult, int i) {
+
+    }
+
+    @Override
+    public void onWalkRouteSearched(WalkRouteResult result, int errorCode) {
+        Route route = new Route(aMap,mContext,mWalkRouteResult);
+        route.onWalkRouteSearched(result,errorCode);
+    }
+
+    @Override
+    public void onRideRouteSearched(RideRouteResult rideRouteResult, int i) {
+
+    }
+
+    @Override
+    public String distance() {
+
+        return null;
     }
 }
 

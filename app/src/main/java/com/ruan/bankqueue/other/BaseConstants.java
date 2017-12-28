@@ -18,6 +18,7 @@ public class BaseConstants {
     public static final int VERSION_GET_SUCCESS_MESSAGE = 0x1000;
     public static final int VERSION_GET_FAIL_MESSAGE = 0x1001;
     public static final int POI_SEARCH_ATM = 0x0002;
+    public static final int ROUTE_TYPE_WALK = 3;
     public static class Action{
         public static final String ACTION_REGISTER = "com.ruan.action.register";
     }
