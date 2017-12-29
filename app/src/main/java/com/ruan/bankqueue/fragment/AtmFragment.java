@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -68,7 +69,7 @@ import static cn.bmob.v3.Bmob.getApplicationContext;
 
 public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListener,
         AMap.OnMarkerClickListener ,AMap.InfoWindowAdapter,AMap.OnInfoWindowClickListener,
-        View.OnClickListener,RouteSearch.OnRouteSearchListener,Route.CallBack{
+        View.OnClickListener,RouteSearch.OnRouteSearchListener{
     View view;
     static String ARG = "arg";
     @BindView(R.id.map_view)
@@ -80,16 +81,14 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
     TextView tvPoiAtm;
     TextView tvDistance;
     PopupWindow popupWindow;
-    boolean isPopupWindowShow;
     LinearLayout layout;
-    View viewAtm;
+    View viewAtm,viewStart,viewEnd;
     Context mContext;
     private AMap aMap;
     private LatLonPoint startPoint;
     private LatLonPoint endPoint;
     private RouteSearch mRouteSearch;
     private UiSettings uiSettings;
-    private WalkRouteResult mWalkRouteResult;
     MyLocationStyle myLocation;
 
     /**
@@ -168,8 +167,6 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
         aMap.setOnInfoWindowClickListener(this);
         // 设置自定义InfoWindow样式
         aMap.setInfoWindowAdapter(this);
-
-
     }
 
 
@@ -204,28 +201,25 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
         super.onDestroyView();
         //在activity执行onDestroy时执行mMapView.onDestroy()，实现地图生命周期管理
         textureMapView.onDestroy();
-        mLocationClient.onDestroy();//销毁定位客户端。
+        //销毁定位客户端。
+        mLocationClient.onDestroy();
         unbinder.unbind();
     }
+
 
     @Override
     public void onResume() {
         super.onResume();
-//        textureMapView.onResume();
-        //在activity执行onResume时执行mMapView.onResume ()，实现地图生命周期管理
 
     }
     @Override
     public void onPause() {
         super.onPause();
-        //在activity执行onPause时执行mMapView.onPause ()，实现地图生命周期管理
-        textureMapView.onPause();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        mLocationClient.stopLocation();//停止定位
     }
 
     @Override
@@ -278,15 +272,10 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
                     // 定位点依照设备方向旋转，并且会跟随设备移动。（1秒1次定位）如果不设置myLocationType，默认也会执行此种模式。
                     myLocation.myLocationType(MyLocationStyle.LOCATION_TYPE_MAP_ROTATE_NO_CENTER);
                     //设置连续定位模式下的定位间隔，只在连续定位模式下生效，单次定位模式下不会生效。单位为毫秒。
-                    myLocation.interval(1000);
+                    myLocation.interval(2000);
                     aMap.setMyLocationStyle(myLocation);
                     // 设置为true表示启动显示定位蓝点，false表示隐藏定位蓝点并不进行定位，默认是false。
                     aMap.setMyLocationEnabled(true);
-//                    BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(
-//                            BitmapFactory.decodeResource(getResources(), R.drawable.ic_byg_location));
-//                    myLocation.myLocationIcon(bitmapDescriptor);
-//                    myLocation.showMyLocation(true);
-
                     // 完成定位发送消息，默认搜索ATM
                     message.what = BaseConstants.POI_SEARCH_ATM;
                     handler.sendMessage(message);
@@ -321,10 +310,10 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
     @Override
     public void onPoiSearched(PoiResult poiResult, int i) {
         // TODO: 2017/12/25 在地图上面显示兴趣点
-        if (i == BaseConstants.CODE_AMAP_SUCCESS){
+        if (i == BaseConstants.CODE_MAP_SUCCESS){
             List<PoiItem> poiItems = poiResult.getPois();
             if (poiItems != null && poiItems.size() > 0) {
-                // TODO: 2017/12/28 搜索完兴趣点，是否清楚之前的图标 ，aMap.clean;
+                // TODO: 2017/12/28 搜索完兴趣点，是否清除之前的图标 ，aMap.clean;
                 PoiOverlay poiOverlay = new PoiOverlay(aMap, poiItems);
                 poiOverlay.removeFromMap();
                 poiOverlay.zoomToSpan();
@@ -385,9 +374,8 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
             LogUtil.e("AtmFragment----", "distance:" + distance);
             float b = (float) (Math.round(distance / 10)) / 100;
             bottomWindow(viewAtm, title, String.valueOf(b));
-            isPopupWindowShow = true;
             endPoint = new LatLonPoint(marker.getPosition().latitude, marker.getPosition().longitude);
-            return isPopupWindowShow;
+            return true;
 
     }
 
@@ -412,6 +400,7 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
      */
     private Marker drawMarkerOnMap(LatLng point, Bitmap markerIcon, String title) {
         if (aMap != null && point != null) {
+            //设置定位蓝点图标的锚点方法。
             Marker marker = aMap.addMarker(new MarkerOptions().anchor(0.5f, 1)
                     .position(point)
                     .title(title)
@@ -487,8 +476,9 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.lay_route:
+
+                    searchRouteResult(3);
                     setFromAndToMarker();
-                    searchRouteResult(3,0);
                 break;
             case R.id.lay_navigation:
                 Toast.makeText(getActivity(), "点击了导航按钮", Toast.LENGTH_SHORT).show();
@@ -503,18 +493,25 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
       */
     private void setFromAndToMarker() {
         LogUtil.e("AtmFragment", "startPoint:----" + startPoint);
-        aMap.addMarker(new MarkerOptions()
-                .position(AMapUtil.convertToLatLng(startPoint))
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_start)));
-        aMap.addMarker(new MarkerOptions()
-                .position(AMapUtil.convertToLatLng(endPoint))
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_end)));
+        viewStart =  View.inflate(getActivity(),R.layout.view_start, null);
+        viewEnd = View.inflate(getActivity(),R.layout.view_end, null);
+        Bitmap bitmapStart = convertViewToBitmap(viewStart);
+        Bitmap bitmapEnd = convertViewToBitmap(viewStart);
+        drawMarkerOnMap(AMapUtil.convertToLatLng(startPoint),bitmapStart,"起点");
+        drawMarkerOnMap(AMapUtil.convertToLatLng(endPoint),bitmapEnd,"终点");
+
+//        aMap.addMarker(new MarkerOptions()
+//                .position(AMapUtil.convertToLatLng(startPoint))
+//                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_start)));
+//        aMap.addMarker(new MarkerOptions()
+//                .position(AMapUtil.convertToLatLng(endPoint))
+//                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_end)));
     }
 
     /**
      * 开始搜索步行路径规划方案
      */
-    public void searchRouteResult(int routeType, int mode) {
+    public void searchRouteResult(int routeType) {
         if (startPoint == null) {
             ToastUtil.show(getActivity(), "定位中，稍后再试...");
             return;
@@ -522,12 +519,14 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
         if (endPoint == null) {
             ToastUtil.show(getActivity(), "终点未设置");
         }
-
+        /**
+         * fromAndTo 路径的起终点
+         */
         final RouteSearch.FromAndTo fromAndTo = new RouteSearch.FromAndTo(
                 startPoint, endPoint);
         // 步行路径规划
         if (routeType == BaseConstants.ROUTE_TYPE_WALK) {
-            RouteSearch.WalkRouteQuery query = new RouteSearch.WalkRouteQuery(fromAndTo, mode);
+            RouteSearch.WalkRouteQuery query = new RouteSearch.WalkRouteQuery(fromAndTo);
             // 异步路径规划步行模式查询
             mRouteSearch.calculateWalkRouteAsyn(query);
 
@@ -546,19 +545,17 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
 
     @Override
     public void onWalkRouteSearched(WalkRouteResult result, int errorCode) {
-        Route route = new Route(aMap,mContext,mWalkRouteResult);
-        route.onWalkRouteSearched(result,errorCode);
+        if (errorCode == BaseConstants.CODE_MAP_SUCCESS){
+            Route route = new Route(aMap,mContext,tvDistance);
+            route.onWalkRouteSearched(result,errorCode);
+        }else {
+            Toast.makeText(mContext, "路径规划失败，错误码：" + errorCode, Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     public void onRideRouteSearched(RideRouteResult rideRouteResult, int i) {
 
-    }
-
-    @Override
-    public String distance() {
-
-        return null;
     }
 }
 

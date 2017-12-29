@@ -1,6 +1,7 @@
 package com.ruan.bankqueue.routePlanning;
 
 import android.content.Context;
+import android.widget.TextView;
 
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.MapView;
@@ -24,14 +25,14 @@ import com.ruan.overlay.WalkRouteOverlay;
 public class Route implements RouteSearch.OnRouteSearchListener {
     AMap aMap;
     Context mContext;
-    WalkRouteResult mWalkRouteResult;
+    TextView tvDistance;
     public Route(){
 
     }
-    public Route(AMap aMap, Context context, WalkRouteResult walkRouteResult){
+    public Route(AMap aMap, Context context,TextView tvDistance){
         this.aMap = aMap;
         this.mContext = context;
-        this.mWalkRouteResult = walkRouteResult;
+        this.tvDistance = tvDistance;
     }
 
     @Override
@@ -51,20 +52,19 @@ public class Route implements RouteSearch.OnRouteSearchListener {
         if (errorCode == AMapException.CODE_AMAP_SUCCESS) {
             if (result != null && result.getPaths() != null) {
                 if (result.getPaths().size() > 0) {
-                    mWalkRouteResult = result;
-                    final WalkPath walkPath = mWalkRouteResult.getPaths()
+                    final WalkPath walkPath = result.getPaths()
                             .get(0);
                     WalkRouteOverlay walkRouteOverlay = new WalkRouteOverlay(
                             mContext, aMap, walkPath,
-                            mWalkRouteResult.getStartPos(),
-                            mWalkRouteResult.getTargetPos());
+                            result.getStartPos(),
+                            result.getTargetPos());
                     walkRouteOverlay.removeFromMap();
                     walkRouteOverlay.addToMap();
                     walkRouteOverlay.zoomToSpan();
                     int dis = (int) walkPath.getDistance();
                     int dur = (int) walkPath.getDuration();
                     String des = AMapUtil.getFriendlyTime(dur)+"("+AMapUtil.getFriendlyLength(dis)+")";
-//                    tvDistance.setText(des);
+                    tvDistance.setText(des);
 
                 } else if (result != null && result.getPaths() == null) {
                     ToastUtil.show(mContext, R.string.no_result);
@@ -76,15 +76,12 @@ public class Route implements RouteSearch.OnRouteSearchListener {
             ToastUtil.showerror(mContext, errorCode);
         }
 
-
     }
-    public  interface CallBack{
-        String distance();
-    }
-
 
     @Override
     public void onRideRouteSearched(RideRouteResult rideRouteResult, int i) {
 
     }
+
+
 }

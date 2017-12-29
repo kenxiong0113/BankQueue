@@ -6,7 +6,7 @@ package com.ruan.bankqueue.other;
  */
 
 public class BaseConstants {
-    public static final int CODE_AMAP_SUCCESS = 1000;
+    public static final int CODE_MAP_SUCCESS = 1000;
     public static final long PHONE_NUMBER = 11;
     public static final long VERIFICATION_CODE_LENGTH = 6;
     public static final long PASSWORD_LENGTH = 6;
