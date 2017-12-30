@@ -1,10 +1,9 @@
 package com.ruan.bankqueue.routePlanning;
 
 import android.content.Context;
+import android.os.Message;
 import android.widget.TextView;
-
 import com.amap.api.maps.AMap;
-import com.amap.api.maps.MapView;
 import com.amap.api.services.core.AMapException;
 import com.amap.api.services.route.BusRouteResult;
 import com.amap.api.services.route.DriveRouteResult;
@@ -58,14 +57,20 @@ public class Route implements RouteSearch.OnRouteSearchListener {
                             mContext, aMap, walkPath,
                             result.getStartPos(),
                             result.getTargetPos());
+//                    去掉BusRouteOverlay上所有的Marker
                     walkRouteOverlay.removeFromMap();
+//                    添加步行路线到地图中。
                     walkRouteOverlay.addToMap();
+//                    移动镜头到当前的视角。
                     walkRouteOverlay.zoomToSpan();
+//                    路段节点图标控制显示
+                    walkRouteOverlay.setNodeIconVisibility(true);
+                    //距离
                     int dis = (int) walkPath.getDistance();
+                    //时间
                     int dur = (int) walkPath.getDuration();
                     String des = AMapUtil.getFriendlyTime(dur)+"("+AMapUtil.getFriendlyLength(dis)+")";
                     tvDistance.setText(des);
-
                 } else if (result != null && result.getPaths() == null) {
                     ToastUtil.show(mContext, R.string.no_result);
                 }
@@ -82,6 +87,5 @@ public class Route implements RouteSearch.OnRouteSearchListener {
     public void onRideRouteSearched(RideRouteResult rideRouteResult, int i) {
 
     }
-
 
 }

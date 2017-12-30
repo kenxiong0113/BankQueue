@@ -2,9 +2,9 @@ package com.ruan.bankqueue.fragment;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -21,7 +21,6 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
@@ -36,6 +35,9 @@ import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.MyLocationStyle;
+import com.amap.api.navi.AMapNavi;
+import com.amap.api.navi.AMapNaviView;
+import com.amap.api.navi.model.NaviLatLng;
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.core.PoiItem;
 import com.amap.api.services.poisearch.PoiResult;
@@ -46,13 +48,13 @@ import com.amap.api.services.route.RideRouteResult;
 import com.amap.api.services.route.RouteSearch;
 import com.amap.api.services.route.WalkRouteResult;
 import com.ruan.bankqueue.R;
+import com.ruan.bankqueue.naviactivity.WalkNavigationActivity;
+import com.ruan.bankqueue.naviutil.TTSController;
 import com.ruan.bankqueue.other.BaseConstants;
 import com.ruan.bankqueue.routePlanning.Route;
-import com.ruan.bankqueue.util.AMapUtil;
 import com.ruan.bankqueue.util.LogUtil;
 import com.ruan.bankqueue.util.ToastUtil;
 import com.ruan.overlay.PoiOverlay;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -82,11 +84,21 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
     TextView tvDistance;
     PopupWindow popupWindow;
     LinearLayout layout;
-    View viewAtm,viewStart,viewEnd;
+    View viewAtm;
+
     Context mContext;
+    AMapNaviView aMapNaviView;
+    AMapNavi aMapNavi;
+    TTSController ttsController;
     private AMap aMap;
     private LatLonPoint startPoint;
     private LatLonPoint endPoint;
+
+    private NaviLatLng naviSatrt;
+    private NaviLatLng naviEnd;
+
+    private double endLat;
+    private double endLon;
     private RouteSearch mRouteSearch;
     private UiSettings uiSettings;
     MyLocationStyle myLocation;
@@ -123,6 +135,7 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
         //在activity执行onCreate时执行mMapView.onCreate(savedInstanceState)，实现地图生命周期管理
         textureMapView.onCreate(savedInstanceState);
         mContext = getApplicationContext();
+        aMapNavi = AMapNavi.getInstance(mContext);
         checkThePermissions();
         //初始化定位
         mLocationClient = new AMapLocationClient(getApplicationContext());
@@ -264,6 +277,7 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
                             " AdCode : " + amapLocation.getAdCode()
                     );
                     startPoint = new LatLonPoint(lat,lon);
+                    naviSatrt = new NaviLatLng(lat,lon);
                     // 设置当前地图显示为当前位置
                     aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 15.5f));
                     myLocation = new MyLocationStyle();
@@ -375,6 +389,9 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
             float b = (float) (Math.round(distance / 10)) / 100;
             bottomWindow(viewAtm, title, String.valueOf(b));
             endPoint = new LatLonPoint(marker.getPosition().latitude, marker.getPosition().longitude);
+            naviEnd = new NaviLatLng(marker.getPosition().latitude, marker.getPosition().longitude);
+            endLat = marker.getPosition().latitude;
+            endLon = marker.getPosition().longitude;
             return true;
 
     }
@@ -435,7 +452,7 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         setButtonListeners(layout,poi,distance);
-        dismissPopupWindow(view, layout);
+        dismissPopupWindow(view);
     }
 
     /**
@@ -454,21 +471,22 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
     }
 
     /**
-     * 点击空白处时，隐藏掉pop窗口
+     * pop 窗口的弹出与隐藏
      */
-    public void dismissPopupWindow(View view, final LinearLayout layout) {
+    public void dismissPopupWindow(View view) {
+             //点击空白处时，隐藏掉pop窗口
             popupWindow.setFocusable(true);
             popupWindow.setBackgroundDrawable(new BitmapDrawable());
             popupWindow.setAnimationStyle(R.style.Popupwindow);
             int[] location = new int[2];
             view.getLocationOnScreen(location);
             popupWindow.showAtLocation(view, Gravity.LEFT | Gravity.BOTTOM, 0, -location[1]);
-            popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
-                @Override
-                public void onDismiss() {
-
-                }
-            });
+//            popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+//                @Override
+//                public void onDismiss() {
+//
+//                }
+//            });
 
     }
 
@@ -476,36 +494,25 @@ public class AtmFragment extends Fragment implements PoiSearch.OnPoiSearchListen
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.lay_route:
-
                     searchRouteResult(3);
-                    setFromAndToMarker();
+
                 break;
             case R.id.lay_navigation:
-                Toast.makeText(getActivity(), "点击了导航按钮", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, "开始导航", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getActivity(),WalkNavigationActivity.class);
+
+                intent.putExtra("startPoint",naviSatrt);
+                intent.putExtra("endPoint",naviEnd);
+                Log.e("AtmFragment", "naviEnd:----" + naviEnd);
+                intent.putExtra("startLat",lat);
+                intent.putExtra("startLon",lon);
+                intent.putExtra("endLat",endLat);
+                intent.putExtra("endLon",endLon);
+                startActivity(intent);
                 break;
             default:
                 break;
         }
-    }
-
-    /**
-     * 设置步行路线的起止点
-      */
-    private void setFromAndToMarker() {
-        LogUtil.e("AtmFragment", "startPoint:----" + startPoint);
-        viewStart =  View.inflate(getActivity(),R.layout.view_start, null);
-        viewEnd = View.inflate(getActivity(),R.layout.view_end, null);
-        Bitmap bitmapStart = convertViewToBitmap(viewStart);
-        Bitmap bitmapEnd = convertViewToBitmap(viewStart);
-        drawMarkerOnMap(AMapUtil.convertToLatLng(startPoint),bitmapStart,"起点");
-        drawMarkerOnMap(AMapUtil.convertToLatLng(endPoint),bitmapEnd,"终点");
-
-//        aMap.addMarker(new MarkerOptions()
-//                .position(AMapUtil.convertToLatLng(startPoint))
-//                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_start)));
-//        aMap.addMarker(new MarkerOptions()
-//                .position(AMapUtil.convertToLatLng(endPoint))
-//                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_end)));
     }
 
     /**

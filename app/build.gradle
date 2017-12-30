@@ -19,21 +19,21 @@ android {
         }
     }
 }
-    dependencies {
-        compile fileTree(include: ['*.jar'], dir: 'libs')
-        androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-            exclude group: 'com.android.support', module: 'support-annotations'
-        })
-        compile 'com.android.support:appcompat-v7:26.+'
-        compile 'com.android.support:design:26.+'
-        compile 'com.android.support:support-vector-drawable:26.+'
-        compile 'cn.bmob.android:bmob-sdk:3.5.8'
-        compile 'com.ashokvarma.android:bottom-navigation-bar:1.3.0'
-        annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
-        compile 'com.jakewharton:butterknife:8.8.1'
-        compile 'com.facebook.fresco:fresco:1.5.0'
-        compile 'com.githang:status-bar-compat:latest.integration'
-        testCompile 'junit:junit:4.12'
-        compile files('libs/AMap3DMap_5.6.0_AMapNavi_5.5.0_AMapSearch_5.5.0_AMapLocation_3.6.1_20171130.jar')
-
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:26.+'
+    compile 'com.android.support:design:26.+'
+    compile 'com.android.support:support-vector-drawable:26.+'
+    compile 'cn.bmob.android:bmob-sdk:3.5.8'
+    compile 'com.ashokvarma.android:bottom-navigation-bar:1.3.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+    compile 'com.jakewharton:butterknife:8.8.1'
+    compile 'com.facebook.fresco:fresco:1.5.0'
+    compile 'com.githang:status-bar-compat:latest.integration'
+    testCompile 'junit:junit:4.12'
+    compile files('libs/AMap3DMap_5.6.0_AMapNavi_5.5.0_AMapSearch_5.5.0_AMapLocation_3.6.1_20171130.jar')
+    compile files('libs/Msc.jar')
 }

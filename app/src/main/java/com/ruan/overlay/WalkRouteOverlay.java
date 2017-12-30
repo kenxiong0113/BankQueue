@@ -46,7 +46,6 @@ public class WalkRouteOverlay extends RouteOverlay {
 	 * @since V2.1.0
 	 */
     public void addToMap() {
-
         initPolylineOptions();
         try {
             List<WalkStep> walkPaths = walkPath.getSteps();
@@ -55,14 +54,12 @@ public class WalkRouteOverlay extends RouteOverlay {
                 WalkStep walkStep = walkPaths.get(i);
                 LatLng latLng = AMapServicesUtil.convertToLatLng(walkStep
                         .getPolyline().get(0));
-                
 				addWalkStationMarkers(walkStep, latLng);
                 addWalkPolyLines(walkStep);
                
             }
             mPolylineOptions.add(endPoint);
             addStartAndEndMarker();
-
             showPolyline();
         } catch (Throwable e) {
             e.printStackTrace();
