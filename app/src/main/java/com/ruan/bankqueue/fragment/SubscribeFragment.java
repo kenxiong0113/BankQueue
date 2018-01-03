@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import com.ruan.bankqueue.R;
 
 /**
- * @author by ruan
+ * @author by ruan  预约
  */
 
 public class SubscribeFragment extends Fragment {

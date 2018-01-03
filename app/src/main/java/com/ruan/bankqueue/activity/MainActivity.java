@@ -27,7 +27,6 @@ import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.ruan.bankqueue.R;
 import com.ruan.bankqueue.fragment.AtmFragment;
-import com.ruan.bankqueue.fragment.BusinessFragment;
 import com.ruan.bankqueue.fragment.QueueFragment;
 import com.ruan.bankqueue.fragment.SubscribeFragment;
 import com.ruan.bankqueue.other.ExitPressed;
@@ -46,7 +45,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     AtmFragment atmFragment;
     QueueFragment queueFragment;
     SubscribeFragment subscribeFragment;
-
     @BindView(R.id.nav_view)
     NavigationView navView;
     @BindView(R.id.drawerLayout)

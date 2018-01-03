@@ -1,5 +1,6 @@
 package com.ruan.bankqueue.naviactivity;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -38,8 +39,8 @@ public class NaviBaseActivity extends AppCompatActivity implements AMapNaviListe
     protected AMapNaviView mAMapNaviView;
     protected AMapNavi mAMapNavi;
     protected TTSController mTtsManager;
-    protected NaviLatLng mEndLatlng = new NaviLatLng(40.084894,116.603039);
-    protected NaviLatLng mStartLatlng = new NaviLatLng(39.825934,116.342972);
+    protected NaviLatLng mEndLatlng = null;
+    protected NaviLatLng mStartLatlng = null;
     protected final List<NaviLatLng> sList = new ArrayList<NaviLatLng>();
     protected final List<NaviLatLng> eList = new ArrayList<NaviLatLng>();
     protected List<NaviLatLng> mWayPointList;
@@ -48,19 +49,7 @@ public class NaviBaseActivity extends AppCompatActivity implements AMapNaviListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        //实例化语音引擎
-        mTtsManager = TTSController.getInstance(getApplicationContext());
-        mTtsManager.init();
 
-        //
-        mAMapNavi = AMapNavi.getInstance(getApplicationContext());
-        mAMapNavi.addAMapNaviListener(this);
-        mAMapNavi.addAMapNaviListener(mTtsManager);
-
-        //设置模拟导航的行车速度
-        mAMapNavi.setEmulatorNaviSpeed(75);
-        sList.add(mStartLatlng);
-        eList.add(mEndLatlng);
     }
 
     @Override
@@ -73,10 +62,8 @@ public class NaviBaseActivity extends AppCompatActivity implements AMapNaviListe
     protected void onPause() {
         super.onPause();
         mAMapNaviView.onPause();
-
 //        仅仅是停止你当前在说的这句话，一会到新的路口还是会再说的
         mTtsManager.stopSpeaking();
-//
 //        停止导航之后，会触及底层stop，然后就不会再有回调了，但是讯飞当前还是没有说完的半句话还是会说完
 //        mAMapNavi.stopNavi();
     }
@@ -93,17 +80,17 @@ public class NaviBaseActivity extends AppCompatActivity implements AMapNaviListe
 
     @Override
     public void onInitNaviFailure() {
-        Toast.makeText(this, "init navi Failed", Toast.LENGTH_SHORT).show();
+        Log.e("NaviBaseActivity----", " 导航初始化失败");
     }
 
     @Override
     public void onInitNaviSuccess() {
-
+        Log.e("NaviBaseActivity----", " 导航初始化成功");
     }
 
     @Override
     public void onStartNavi(int i) {
-
+        Log.e("NaviBaseActivity", "i:" + i);
     }
 
     @Override
@@ -143,7 +130,8 @@ public class NaviBaseActivity extends AppCompatActivity implements AMapNaviListe
         Log.i("dm", "路线计算失败：错误码=" + errorInfo + ",Error Message= " + ErrorInfo.getError(errorInfo));
         Log.i("dm", "错误码详细链接见：http://lbs.amap.com/api/android-navi-sdk/guide/tools/errorcode/");
         Log.e("dm", "--------------------------------------------");
-        Toast.makeText(this, "errorInfo：" + errorInfo + ",Message：" + ErrorInfo.getError(errorInfo), Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "errorInfo：" + errorInfo + ",Message：" +
+                ErrorInfo.getError(errorInfo), Toast.LENGTH_LONG).show();
 
 
     }
