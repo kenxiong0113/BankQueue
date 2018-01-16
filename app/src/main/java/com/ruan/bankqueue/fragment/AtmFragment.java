@@ -129,7 +129,6 @@ public class AtmFragment extends BaseFragment{
             for (int j = 0; j < poiResult.getPois().size(); j++) {
                 viewAtm = View.inflate(getActivity(),R.layout.view_atm, null);
                 tvTitle = (TextView)viewAtm.findViewById(R.id.tv_title);
-
                 Bitmap bitmap = markerUtil.convertViewToBitmap(viewAtm);
                 markerUtil.drawMarkerOnMap(new LatLng(poiResult.getPois().get(j).getLatLonPoint().getLatitude(),
                                 poiResult.getPois().get(j).getLatLonPoint().getLongitude()),

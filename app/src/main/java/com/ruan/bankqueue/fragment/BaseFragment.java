@@ -38,10 +38,6 @@ import com.ruan.bankqueue.util.LogUtil;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import butterknife.Unbinder;
-
-import static cn.bmob.v3.Bmob.getApplicationContext;
-
 /**
  * @author  by ruan on 2018/1/3.
  */
@@ -81,7 +77,7 @@ public class BaseFragment extends Fragment implements PoiSearch.OnPoiSearchListe
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what){
-                case BaseConstants.POI_SEARCH_ATM:
+                case BaseConstants.POI_SEARCH:
                     poiSearch();
                     break;
                 default:
@@ -99,6 +95,7 @@ public class BaseFragment extends Fragment implements PoiSearch.OnPoiSearchListe
         //设置定位回调监听
         mLocationClient.setLocationListener(mLocationListener);
         checkThePermissions();
+        myLocation = new MyLocationStyle();
         return view;
     }
 
@@ -189,8 +186,7 @@ public class BaseFragment extends Fragment implements PoiSearch.OnPoiSearchListe
                     naviStart = new NaviLatLng(lat,lon);
                     // 设置当前地图显示为当前位置
                     aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 15.5f));
-                    myLocation = new MyLocationStyle();
-                    //初始化定位蓝点样式类myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE);
+
                     // 连续定位、且将视角移动到地图中心点，
                     // 定位点依照设备方向旋转，并且会跟随设备移动。（1秒1次定位）如果不设置myLocationType，默认也会执行此种模式。
                     myLocation.myLocationType(MyLocationStyle.LOCATION_TYPE_MAP_ROTATE_NO_CENTER);
@@ -200,7 +196,7 @@ public class BaseFragment extends Fragment implements PoiSearch.OnPoiSearchListe
                     // 设置为true表示启动显示定位蓝点，false表示隐藏定位蓝点并不进行定位，默认是false。
                     aMap.setMyLocationEnabled(true);
                     // 完成定位发送消息，默认搜索ATM
-                    message.what = BaseConstants.POI_SEARCH_ATM;
+                    message.what = BaseConstants.POI_SEARCH;
                     handler.sendMessage(message);
                 } else {
                     //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。

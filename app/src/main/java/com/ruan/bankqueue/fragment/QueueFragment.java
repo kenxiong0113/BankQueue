@@ -1,8 +1,10 @@
 package com.ruan.bankqueue.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,11 +12,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.amap.api.maps.TextureMapView;
 import com.amap.api.maps.model.LatLng;
+import com.amap.api.maps.model.Marker;
+import com.amap.api.maps.model.MyLocationStyle;
 import com.amap.api.navi.AMapNavi;
 import com.amap.api.services.core.PoiItem;
 import com.amap.api.services.poisearch.PoiResult;
 import com.ruan.bankqueue.R;
+import com.ruan.bankqueue.activity.QueueActivity;
 import com.ruan.bankqueue.other.BaseConstants;
+import com.ruan.bankqueue.util.ConfirmDialog;
 import com.ruan.bankqueue.util.LogUtil;
 import com.ruan.overlay.PoiOverlay;
 import java.util.List;
@@ -23,7 +29,7 @@ import java.util.List;
  * @author by ruan on 2017/12/16. 银行排队
  */
 
-public class QueueFragment extends BaseFragment {
+public class QueueFragment extends BaseFragment{
     private static String ARG = "arg";
     protected Context mContext;
     protected AMapNavi aMapNavi;
@@ -52,6 +58,9 @@ public class QueueFragment extends BaseFragment {
         setPoiCode("160100",8000);
         mContext = getActivity().getApplicationContext();
         aMapNavi = AMapNavi.getInstance(mContext);
+
+        myLocation.myLocationType(MyLocationStyle.LOCATION_TYPE_FOLLOW);
+        myLocation.interval(30000);
         initAMap();
         return view;
     }
@@ -67,6 +76,7 @@ public class QueueFragment extends BaseFragment {
     @Override
     protected void initAMap() {
         super.initAMap();
+
     }
 
     /**
@@ -93,12 +103,45 @@ public class QueueFragment extends BaseFragment {
                 markerUtil.drawMarkerOnMap(new LatLng(poiResult.getPois().get(j).getLatLonPoint().getLatitude(),
                                 poiResult.getPois().get(j).getLatLonPoint().getLongitude()),
                         bitmap, poiResult.getPois().get(j).getTitle());
-
             }
             setMapAttributeListener();
         }else {
             LogUtil.e("AtmFragment", "i:" + i);
         }
+    }
 
+    @Override
+    protected void setMapAttributeListener() {
+        super.setMapAttributeListener();
+        aMap.setOnMarkerClickListener(this);
+    }
+
+    @Override
+    public boolean onMarkerClick(final Marker marker) {
+        Log.e("QueueFragment", marker.getTitle());
+        final ConfirmDialog dialog = new ConfirmDialog(getActivity(),
+                "请选择",marker.getTitle(),"排队","取消","导航");
+        dialog.show();
+        dialog.setClickListener(new ConfirmDialog.ClickListenerInterface() {
+            @Override
+            public void doConfirm() {
+                Intent intent = new Intent(getActivity(), QueueActivity.class);
+                intent.putExtra("bankName",marker.getTitle());
+                startActivity(intent);
+                dialog.dismiss();
+            }
+
+            @Override
+            public void doCancel() {
+                dialog.dismiss();
+            }
+
+            @Override
+            public void doNavigation() {
+                dialog.dismiss();
+            }
+        });
+
+        return super.onMarkerClick(marker);
     }
 }

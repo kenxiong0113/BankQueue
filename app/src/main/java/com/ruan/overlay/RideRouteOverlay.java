@@ -97,7 +97,7 @@ public class RideRouteOverlay extends RouteOverlay {
     private void initPolylineOptions() {
     	
     	if(walkStationDescriptor == null) {
-    		walkStationDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.ic_ride);
+    		walkStationDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.amap_ride);
     	}
         mPolylineOptions = null;
         mPolylineOptions = new PolylineOptions();

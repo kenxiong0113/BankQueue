@@ -105,7 +105,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .initialise();
         setDefaultFragment();
         navigation.setTabSelectedListener(this);
-
     }
 
     private void initDrawerLayout() {
@@ -135,7 +134,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         atmFragment = AtmFragment.newInstance(getString(R.string.title_atm));
         transaction.replace(R.id.content, atmFragment);
         transaction.commit();
-
     }
 
     /**

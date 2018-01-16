@@ -161,17 +161,17 @@ public class BusLineOverlay {
     }
 
     protected BitmapDescriptor getStartBitmapDescriptor() {
-        startBit = BitmapDescriptorFactory.fromResource(R.drawable.ic_start);
+        startBit = BitmapDescriptorFactory.fromResource(R.drawable.amap_start);
         return startBit;
     }
 
     protected BitmapDescriptor getEndBitmapDescriptor() {
-        endBit = BitmapDescriptorFactory.fromResource(R.drawable.ic_end);
+        endBit = BitmapDescriptorFactory.fromResource(R.drawable.amap_end);
         return endBit;
     }
 
     protected BitmapDescriptor getBusBitmapDescriptor() {
-        busBit = BitmapDescriptorFactory.fromResource(R.drawable.ic_bus);
+        busBit = BitmapDescriptorFactory.fromResource(R.drawable.amap_bus);
         return busBit;
     }
 
