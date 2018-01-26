@@ -63,7 +63,7 @@
             android:theme="@android:style/Theme.Light.NoTitleBar" />
         <activity
             android:name="cn.bmob.v3.update.UpdateDialogActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"></activity>
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
         <!-- 兼容android 7.0 -->
         <provider
@@ -76,7 +76,9 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <activity android:name=".activity.QueueActivity"></activity>
+        <activity android:name=".activity.QueueActivity" />
+        <activity android:name=".activity.UserInfoActivity" />
+        <activity android:name=".activity.FixPasswordActivity"></activity>
     </application>
 
 </manifest>

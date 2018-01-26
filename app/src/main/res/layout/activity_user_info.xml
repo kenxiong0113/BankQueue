@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.ruan.bankqueue.activity.UserInfoActivity">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:id="@+id/tv_username"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="4dp"
+        android:gravity="center"
+        />
+    <View
+        android:id="@+id/view"
+        style="@style/RegisterView"
+        android:layout_below="@+id/tv_username"
+        />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:id="@+id/tv_fixPassword"
+        android:layout_below="@id/view"
+        android:layout_margin="4dp"
+        android:text="修改密码"
+        android:textSize="18sp"
+        android:gravity="center|left"
+        android:layout_centerHorizontal="true"
+        android:drawableEnd="@drawable/ic_chevron_right_black_24dp"
+        />
+    <View
+        android:id="@+id/view1"
+        style="@style/RegisterView"
+        android:layout_below="@+id/tv_fixPassword"
+        />
+
+</RelativeLayout>

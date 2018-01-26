@@ -34,8 +34,7 @@ import cn.bmob.v3.listener.SaveListener;
 import cn.bmob.v3.listener.UpdateListener;
 
 /**
- * @author by ruan
- *         用户银行排队界面
+ * @author by ruan 用户银行排队界面
  */
 public class QueueActivity extends BaseActivity {
     @BindView(R.id.tv_num)
@@ -134,7 +133,6 @@ public class QueueActivity extends BaseActivity {
                         // TODO: 2018/1/13 窗口开放，允许排队的逻辑
                         progress.setVisibility(View.VISIBLE);
                         individualQueueStatus();
-
                     }
                 } else {
                     Log.e("QueueActivity", e.getErrorCode() + e.getMessage());
@@ -147,7 +145,8 @@ public class QueueActivity extends BaseActivity {
     public void onClick(View view){
         switch (view.getId()){
             case R.id.img_yes:
-                getTheLastTimeTheUserHasToCancelTheQueue();
+
+                getLastTime();
                 break;
             case R.id.img_cancel:
                 Queue queue1 = new Queue();
@@ -239,7 +238,6 @@ public class QueueActivity extends BaseActivity {
      */
 
     private void bankQueueCount(){
-        // TODO: 2018/1/13  （暂不设置当日，后续当日定时清零）
         BmobQuery<HeadCount> query = new BmobQuery<HeadCount>();
         query.addWhereEqualTo("bankName",bankName);
         //查询最新的数据
@@ -282,7 +280,7 @@ public class QueueActivity extends BaseActivity {
                             }
                         });
                 }else{
-                    Log.d("QueueActivity", e.getErrorCode() + e.getMessage());
+                    Log.e("QueueActivity", e.getErrorCode() + e.getMessage());
                 }
             }
         });
@@ -312,7 +310,7 @@ public class QueueActivity extends BaseActivity {
         BmobQuery<Queue> query = new BmobQuery<Queue>();
         query.addWhereEqualTo("bankName",bankName);
         query.addWhereLessThan("lineCode", code);
-        query.addWhereNotEqualTo("lineUpRecord",user.getObjectId());
+        query.addWhereEqualTo("state",true);
         query.findObjects(new FindListener<Queue>() {
             @Override
             public void done(List<Queue> list, BmobException e) {
@@ -321,7 +319,7 @@ public class QueueActivity extends BaseActivity {
                     num.setText(String.valueOf(sum));
                     Log.e("QueueActivity", "sum:" + sum);
                 }else{
-                    Log.d("QueueActivity", e.getErrorCode() + e.getMessage());
+                    Log.e("QueueActivity", e.getErrorCode() + e.getMessage());
                 }
             }
         });
@@ -330,7 +328,7 @@ public class QueueActivity extends BaseActivity {
     /**
      * 获取用户最后一次点击取消排队的时间
      */
-    private void getTheLastTimeTheUserHasToCancelTheQueue(){
+    private void getLastTime(){
         BmobQuery<Queue> bmobQuery = new BmobQuery<Queue>();
         bmobQuery.addWhereEqualTo("lineUpRecord",user.getObjectId());
         bmobQuery.addWhereEqualTo("bankName",bankName);
@@ -339,23 +337,33 @@ public class QueueActivity extends BaseActivity {
             @Override
             public void done(List<Queue> list, BmobException e) {
                 if (e == null){
-                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    String updateTime = list.get(0).getUpdatedAt();
-                    try {
-                        Date date = formatter.parse(updateTime);
-                        ts = date.getTime();
-                        long mistiming = ((timestampServerTime - ts)/(1000*60));
-                      if ( mistiming > 5){
-                            //查询所选银行累计排队的总人数，确定排号码
-                            bankQueueCount();
-                        }else {
-                            Toast.makeText(QueueActivity.this, "操作频繁，请"+mistiming+"分钟后重试", Toast.LENGTH_SHORT).show();
+                    if (list.size() == 0){
+                        //查询所选银行累计排队的总人数，确定排号码
+                        bankQueueCount();
+                    }else {
+                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        String updateTime = list.get(0).getUpdatedAt();
+                        try {
+                            Date date = formatter.parse(updateTime);
+                            ts = date.getTime();
+                            long mistiming = ((timestampServerTime - ts)/(1000*60));
+                            if ( mistiming > 5){
+                                //查询所选银行累计排队的总人数，确定排号码
+                                bankQueueCount();
+                            }else {
+                                Toast.makeText(QueueActivity.this, "操作频繁，请"+mistiming+"分钟后重试",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (ParseException e1) {
+                            e1.printStackTrace();
+                        }finally {
+
                         }
-                    } catch (ParseException e1) {
-                        e1.printStackTrace();
                     }
                 }else {
-                    Toast.makeText(QueueActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e("QueueActivity", "排队"+e.getMessage() + e.getErrorCode());
+                    Toast.makeText(QueueActivity.this, e.getMessage()+e.getErrorCode(),
+                            Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -375,10 +383,11 @@ public class QueueActivity extends BaseActivity {
                         e1.printStackTrace();
                     }
                 }else{
-                    Log.e("bmob","获取服务器时间失败:" + e.getMessage());
+                    Log.e("bmob","获取服务器时间失败:" + e.getMessage()+e.getErrorCode());
                 }
             }
 
         });
     }
+
 }

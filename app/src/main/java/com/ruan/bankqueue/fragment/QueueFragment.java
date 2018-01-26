@@ -19,6 +19,7 @@ import com.amap.api.services.core.PoiItem;
 import com.amap.api.services.poisearch.PoiResult;
 import com.ruan.bankqueue.R;
 import com.ruan.bankqueue.activity.QueueActivity;
+import com.ruan.bankqueue.naviactivity.WalkNavigationActivity;
 import com.ruan.bankqueue.other.BaseConstants;
 import com.ruan.bankqueue.util.ConfirmDialog;
 import com.ruan.bankqueue.util.LogUtil;
@@ -36,6 +37,8 @@ public class QueueFragment extends BaseFragment{
     protected View viewBank;
     protected TextView tvBankTitle;
     protected ImageView imgBank;
+    private double endLat;
+    private double endLon;
     public QueueFragment() {
         super();
     }
@@ -119,6 +122,8 @@ public class QueueFragment extends BaseFragment{
     @Override
     public boolean onMarkerClick(final Marker marker) {
         Log.e("QueueFragment", marker.getTitle());
+        endLat = marker.getPosition().latitude;
+        endLon = marker.getPosition().longitude;
         final ConfirmDialog dialog = new ConfirmDialog(getActivity(),
                 "请选择",marker.getTitle(),"排队","取消","导航");
         dialog.show();
@@ -139,6 +144,16 @@ public class QueueFragment extends BaseFragment{
             @Override
             public void doNavigation() {
                 dialog.dismiss();
+                Intent intent = new Intent(getActivity(),WalkNavigationActivity.class);
+                intent.putExtra("startPoint", naviStart);
+                intent.putExtra("endPoint",naviEnd);
+                intent.putExtra("startLat",lat);
+                intent.putExtra("startLon",lon);
+                intent.putExtra("endLat",endLat);
+                intent.putExtra("endLon",endLon);
+                intent.putExtra("poiName",poiName);
+                intent.putExtra("markerName",markerName);
+                startActivity(intent);
             }
         });
 

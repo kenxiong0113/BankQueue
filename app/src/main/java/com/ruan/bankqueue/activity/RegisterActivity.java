@@ -60,7 +60,7 @@ public class RegisterActivity extends BaseActivity {
     }
 
     private void initToolbar(){
-        setTitle("手机验证注册");
+        setTitle(getIntent().getStringExtra("title"));
         setTopLeftButton(R.drawable.ic_return, new OnClickListener() {
             @Override
             public void onClick() {

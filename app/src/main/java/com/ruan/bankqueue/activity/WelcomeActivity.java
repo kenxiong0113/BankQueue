@@ -49,8 +49,8 @@ public class WelcomeActivity extends AppCompatActivity {
     Message message = new Message();
     @BindView(R.id.progress)
     ProgressBar progress;
+    CountDownTimer count;
     private Handler handler = new Handler(new Handler.Callback() {
-
         @Override
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
@@ -69,14 +69,6 @@ public class WelcomeActivity extends AppCompatActivity {
                     checkTheUserCache();
                     Toast.makeText(context, "加载图片失败", Toast.LENGTH_SHORT).show();
                     break;
-
-                case BaseConstants.MESSAGE_USER_CACHE_EXISTS:
-                    // TODO: 2017/12/16 用户缓存不为空
-                    break;
-                case BaseConstants.MESSAGE_USER_CACHE_INEXISTENCE:
-                    // TODO: 2017/12/16 用户缓存为空
-                    break;
-
                 default:
                     break;
             }
@@ -105,6 +97,8 @@ public class WelcomeActivity extends AppCompatActivity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_jump:
+                //点击跳过按钮，取消正在执行的倒计时线程
+                count.cancel();
                checkTheUserCache();
                 break;
             default:
@@ -134,6 +128,7 @@ public class WelcomeActivity extends AppCompatActivity {
      */
     private void initStartThePictures() {
         BmobQuery bmobQuery = new BmobQuery();
+        bmobQuery.order("-createdAt");
         bmobQuery.findObjects(new FindListener<WelcomePicture>() {
             @Override
             public void done(List<WelcomePicture> object, BmobException e) {
@@ -175,7 +170,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
     private void jump(){
         btnJump.setVisibility(View.VISIBLE);
-        new CountDownTimer(3000, 1000) {
+         count = new CountDownTimer(3000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 btnJump.setText(String.format("跳过(%ds)", millisUntilFinished / 1000));

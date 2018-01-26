@@ -84,13 +84,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         initBottomNavigationBar();
 
     }
-
-
     private void initToolbar(){
         toolbar.setTitle("");
         tvToolbar.setText("附近ATM");
         setSupportActionBar(toolbar);
-
     }
     /**
      * 设置底部导航图片和图标，添加底部导航的点击事件
@@ -159,7 +156,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 transaction.replace(R.id.content, queueFragment);
                 break;
             case 2:
-
                 subscribeFragment = SubscribeFragment.newInstance(getString(R.string.title_subscribe));
                 tvToolbar.setText(getString(R.string.title_subscribe));
                 transaction.replace(R.id.content, subscribeFragment);
@@ -170,7 +166,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         // 事务提交
         transaction.commit();
-
     }
 
     @Override
@@ -184,13 +179,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 ft.commitAllowingStateLoss();
             }
         }
-
     }
 
     @Override
     public void onTabReselected(int position) {
-
-
     }
 
     /**
@@ -206,7 +198,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         else if (pressed.exitPressed(context)){
             finish();
         }
-
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -215,14 +206,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         if (id == R.id.nav_my_info) {
-            Toast.makeText(context, "点击了我的资料", Toast.LENGTH_SHORT).show();
-            // Handle the camera action
+            startActivity(new Intent(context,UserInfoActivity.class));
         } else if (id == R.id.nav_version){
             Intent intent = new Intent(context,VersionActivity.class);
             startActivity(intent);
-
         } else if (id == R.id.nav_exit) {
-            Intent intent = new Intent(getApplication(), LoginActivity.class);
+            Intent intent = new Intent(context, LoginActivity.class);
             startActivity(intent);
             BmobUser.logOut();
             finish();

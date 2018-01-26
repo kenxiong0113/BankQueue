@@ -48,7 +48,6 @@ public class LoginActivity extends BaseActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
@@ -64,16 +63,16 @@ public class LoginActivity extends BaseActivity {
 
     }
 
-    @OnClick({R.id.tv_register, R.id.btn_login})
+    @OnClick({R.id.tv_register, R.id.btn_login,R.id.tv_forget})
 
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.tv_register:
                 Intent intent = new Intent(getApplication(), RegisterActivity.class);
+                intent.putExtra("title","手机验证注册");
                 startActivity(intent);
                 break;
             case R.id.btn_login:
-
                 username = etPhone.getText().toString();
                 password = etPassword.getText().toString();
                 if (username.length() == BaseConstants.PHONE_NUMBER &&
@@ -112,6 +111,11 @@ public class LoginActivity extends BaseActivity {
                 } else {
                     Toast.makeText(this, "请输入正确的手机号密码", Toast.LENGTH_SHORT).show();
                 }
+                break;
+            case R.id.tv_forget:
+                Intent intent1 = new Intent(this,RegisterActivity.class);
+                intent1.putExtra("title","手机验证");
+                startActivity(intent1);
                 break;
             default:
                 break;
