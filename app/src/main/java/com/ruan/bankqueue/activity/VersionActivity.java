@@ -1,6 +1,7 @@
 package com.ruan.bankqueue.activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -57,7 +58,6 @@ public class VersionActivity extends BaseActivity {
                     if (versionId.equals(ver)) {
                         Toast.makeText(context, "当前版本已经是最新版本", Toast.LENGTH_SHORT).show();
                     } else {
-                        LogUtil.e("手动更新----", ver + "----" + versionId);
                         BmobUpdateAgent.forceUpdate(context);
                     }
                     progress.setVisibility(View.GONE);
@@ -114,13 +114,16 @@ public class VersionActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
     }
 
-    @OnClick({R.id.tv_version_up})
+    @OnClick({R.id.tv_version_up,R.id.tv_feedback})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.tv_version_up:
                 progress.setVisibility(View.VISIBLE);
                 getsTheLocalCacheVersionNumber();
                 acquireVersionNumber();
+                break;
+            case R.id.tv_feedback:
+                    startActivity(new Intent(this,FeedbackActivity.class));
                 break;
             default:
                 break;

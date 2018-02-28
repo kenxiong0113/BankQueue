@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.ruan.bankqueue.activity.FeedbackActivity">
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        app:cardCornerRadius="4dp"
+        android:layout_margin="10dp"
+        >
+        <EditText
+            android:id="@+id/et_feedback"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#00000000"
+            android:textSize="18sp"
+            android:gravity="start"
+            android:hint="请用少于150字的话说出您的宝贵意见，谢谢"
+            android:maxLength="150"
+            android:layout_margin="4dp"
+            />
+    </android.support.v7.widget.CardView>
+
+    <Button
+        android:id="@+id/btn_commit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/btn_sharp_blue"
+        android:textColor="@color/white"
+        android:layout_marginStart="20dp"
+        android:text="提交" />
+</RelativeLayout>

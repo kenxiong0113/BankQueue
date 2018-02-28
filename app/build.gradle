@@ -2,13 +2,13 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    buildToolsVersion "26.0.2"
     defaultConfig {
         applicationId "com.ruan.bankqueue"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 3
-        versionName "V 1.0.2 Bate"
+        versionCode 6
+        versionName "V 1.0.6 Bate"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
@@ -35,6 +35,7 @@ dependencies {
     compile 'com.facebook.fresco:fresco:1.5.0'
     compile 'com.githang:status-bar-compat:latest.integration'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.android.support:cardview-v7:26.+'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
 }

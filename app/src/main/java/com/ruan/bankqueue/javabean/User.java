@@ -7,5 +7,13 @@ import cn.bmob.v3.BmobUser;
  */
 
 public class User extends BmobUser{
+    private Integer  integral;
 
+    public Integer getIntegral() {
+    return integral;
+}
+
+    public void setIntegral(Integer integral) {
+        this.integral = integral;
+    }
 }

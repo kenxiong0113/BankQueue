@@ -1,7 +1,9 @@
 package com.ruan.bankqueue.activity;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -12,8 +14,10 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -36,7 +40,9 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cn.bmob.v3.BmobUser;
+import cn.bmob.v3.listener.BmobUpdateListener;
 import cn.bmob.v3.update.BmobUpdateAgent;
+import cn.bmob.v3.update.UpdateResponse;
 
 /**
  * @author by ruan
@@ -73,7 +79,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimaryStatus));
         }
         ButterKnife.bind(this);
-
 //        创建AppVersion表
         // TODO: 2017/12/19 创建成功即清理此行
 //        BmobUpdateAgent.initAppVersion();
@@ -82,6 +87,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         initToolbar();
         initDrawerLayout();
         initBottomNavigationBar();
+        BmobUpdateAgent.setUpdateListener(new BmobUpdateListener() {
+            @Override
+            public void onUpdateReturned(int updateStatus, UpdateResponse updateInfo) {
+                // TODO Auto-generated method stub
+                //根据updateStatus来判断更新是否成功
+                Log.e("MainActivity", "updateStatus:" + updateStatus);
+                Log.e("MainActivity", "updateInfo:" + updateInfo);
+            }
+        });
 
     }
     private void initToolbar(){
@@ -160,7 +174,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 tvToolbar.setText(getString(R.string.title_subscribe));
                 transaction.replace(R.id.content, subscribeFragment);
                 break;
-
             default:
                 break;
         }
@@ -208,9 +221,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (id == R.id.nav_my_info) {
             startActivity(new Intent(context,UserInfoActivity.class));
         } else if (id == R.id.nav_version){
-            Intent intent = new Intent(context,VersionActivity.class);
-            startActivity(intent);
-        } else if (id == R.id.nav_exit) {
+            startActivity(new Intent(context,VersionActivity.class));
+        } else if (id == R.id.nav_my_queue){
+            SharedPreferences preferences = getSharedPreferences("Bank",MODE_PRIVATE);
+            if (preferences.getString("bankName","").equals("")){
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("请注意！");
+                builder.setMessage("请先到排队界面选择银行排队取号");
+                builder.setCancelable(true);
+                builder.setPositiveButton("确定", null);
+                builder.show();
+            }else {
+                Intent intent = new Intent(context,QueueActivity.class);
+                intent.putExtra("bankName",preferences.getString("bankName",""));
+                startActivity(intent);
+            }
+
+        }else if (id == R.id.nav_my_yy){
+           startActivity(new Intent(this,MySubscribeActivity.class));
+
+        }else if (id == R.id.nav_exit) {
             Intent intent = new Intent(context, LoginActivity.class);
             startActivity(intent);
             BmobUser.logOut();

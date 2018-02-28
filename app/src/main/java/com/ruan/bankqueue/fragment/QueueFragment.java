@@ -1,15 +1,19 @@
 package com.ruan.bankqueue.fragment;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.amap.api.maps.TextureMapView;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
@@ -19,12 +23,20 @@ import com.amap.api.services.core.PoiItem;
 import com.amap.api.services.poisearch.PoiResult;
 import com.ruan.bankqueue.R;
 import com.ruan.bankqueue.activity.QueueActivity;
+import com.ruan.bankqueue.activity.UserInfoActivity;
+import com.ruan.bankqueue.javabean.User;
+import com.ruan.bankqueue.javabean.UserIntegral;
 import com.ruan.bankqueue.naviactivity.WalkNavigationActivity;
 import com.ruan.bankqueue.other.BaseConstants;
 import com.ruan.bankqueue.util.ConfirmDialog;
 import com.ruan.bankqueue.util.LogUtil;
 import com.ruan.overlay.PoiOverlay;
 import java.util.List;
+
+import cn.bmob.v3.BmobQuery;
+import cn.bmob.v3.BmobUser;
+import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.FindListener;
 
 /**
  * @author by ruan on 2017/12/16. 银行排队
@@ -39,6 +51,7 @@ public class QueueFragment extends BaseFragment{
     protected ImageView imgBank;
     private double endLat;
     private double endLon;
+    User user;
     public QueueFragment() {
         super();
     }
@@ -54,6 +67,7 @@ public class QueueFragment extends BaseFragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreateView(inflater,container,savedInstanceState);
+        user = BmobUser.getCurrentUser(User.class);
         view = inflater.inflate(R.layout.fragment_queue, container, false);
         textureMapView = (TextureMapView)view.findViewById(R.id.map_bank);
         //在activity执行onCreate时执行mMapView.onCreate(savedInstanceState)，实现地图生命周期管理
@@ -61,9 +75,7 @@ public class QueueFragment extends BaseFragment{
         setPoiCode("160100",8000);
         mContext = getActivity().getApplicationContext();
         aMapNavi = AMapNavi.getInstance(mContext);
-
-        myLocation.myLocationType(MyLocationStyle.LOCATION_TYPE_FOLLOW);
-        myLocation.interval(30000);
+        myLocation.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATE);
         initAMap();
         return view;
     }
@@ -130,10 +142,40 @@ public class QueueFragment extends BaseFragment{
         dialog.setClickListener(new ConfirmDialog.ClickListenerInterface() {
             @Override
             public void doConfirm() {
-                Intent intent = new Intent(getActivity(), QueueActivity.class);
-                intent.putExtra("bankName",marker.getTitle());
-                startActivity(intent);
-                dialog.dismiss();
+                BmobQuery<UserIntegral> query = new BmobQuery<UserIntegral>();
+                query.addWhereEqualTo("phone",user.getUsername());
+                query.findObjects(new FindListener<UserIntegral>() {
+                    @Override
+                    public void done(List<UserIntegral> list, BmobException e) {
+                        if (e == null){
+                            Integer i = list.get(0).getIntegral();
+                            if (i < 90){
+                                AlertDialog.Builder dia = new AlertDialog.Builder(getActivity());
+                                dia.setCancelable(true);
+                                dia.setTitle("很抱歉");
+                                dia.setIcon(R.drawable.ic_x);
+                                dia.setMessage("你的信誉积分低于90分，已被加入黑名单，无法正常使用该功能," +
+                                        "请到任意银行网点办理相关手续提升信誉积分");
+                                dia.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dia, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                                dia.show();
+                            }else {
+                                Intent intent = new Intent(getActivity(), QueueActivity.class);
+                                intent.putExtra("bankName",marker.getTitle());
+                                startActivity(intent);
+                                dialog.dismiss();
+                            }
+                        }else {
+                            Toast.makeText(getActivity(), e.getMessage() + e.getErrorCode(),
+                                    Toast.LENGTH_SHORT).show();
+                            Log.e("UserInfoActivity", e.getMessage() + e.getErrorCode());
+                        }
+                    }
+                });
             }
 
             @Override

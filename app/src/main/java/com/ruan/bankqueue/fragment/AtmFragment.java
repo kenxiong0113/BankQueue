@@ -88,7 +88,7 @@ public class AtmFragment extends BaseFragment{
     }
 
     private void initSearchAtm(){
-        setPoiCode("160300",5000);
+        setPoiCode("160300",6000);
     }
 
     @Override

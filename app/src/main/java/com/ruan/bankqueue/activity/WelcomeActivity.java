@@ -83,7 +83,7 @@ public class WelcomeActivity extends AppCompatActivity {
         //隐藏状态栏
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         //设置状态栏颜色
-//       StatusBarCompat.setStatusBarColor(this, getResources().getColor(R.color.transparency),true);
+        //StatusBarCompat.setStatusBarColor(this, getResources().getColor(R.color.transparency),true);
         ButterKnife.bind(this);
         Bmob.initialize(this, "1a64430728c9d575b7eb3117f2cf7e63");
         context = getApplicationContext();
@@ -112,13 +112,11 @@ public class WelcomeActivity extends AppCompatActivity {
     private void checkTheUserCache() {
         if (bmobUser != null) {
             // 允许用户使用应用
-            Intent intent = new Intent(getApplication(), MainActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(getApplication(), MainActivity.class));
             finish();
         } else {
             //缓存用户对象为空时， 可打开用户登录界面…
-            Intent intent = new Intent(getApplication(), LoginActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(getApplication(), LoginActivity.class));
             finish();
         }
     }

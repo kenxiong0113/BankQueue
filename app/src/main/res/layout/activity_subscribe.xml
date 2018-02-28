@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.ruan.bankqueue.activity.SubscribeActivity">
+
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="220dp"
+    android:background="#00BCD4"
+    >
+
+    <TextView
+        android:id="@+id/tv_yy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:textSize="50sp"
+        android:textColor="@color/red"
+        android:text="未预约"
+        />
+
+</RelativeLayout>
+    <Button
+        android:id="@+id/btn_yy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="预约业务"
+        android:background="@drawable/btn_sharp_blue"
+        android:textColor="@color/white"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="40dp"
+        />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_cancel"
+        android:layout_below="@+id/btn_yy"
+        android:background="@drawable/btn_sharp_red"
+        android:layout_marginTop="40dp"
+        android:layout_marginStart="40dp"
+        android:layout_centerHorizontal="true"
+        android:text="取消"
+        android:textColor="@color/white"
+        />
+
+</RelativeLayout>

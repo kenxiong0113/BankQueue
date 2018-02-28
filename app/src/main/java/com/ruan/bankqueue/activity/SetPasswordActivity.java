@@ -2,6 +2,7 @@ package com.ruan.bankqueue.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -12,6 +13,7 @@ import android.widget.Toast;
 
 import com.ruan.bankqueue.R;
 import com.ruan.bankqueue.javabean.User;
+import com.ruan.bankqueue.javabean.UserIntegral;
 import com.ruan.bankqueue.other.BaseConstants;
 import com.ruan.bankqueue.util.LogUtil;
 
@@ -83,20 +85,34 @@ public class SetPasswordActivity extends BaseActivity {
                         user.setMobilePhoneNumber(phone);
                         //设置用户名，如果没有传用户名，则默认为手机号码
                         user.setUsername(phone);
-                        //设置额外信息：此处为年龄
                         user.setPassword(password);
                         user.setMobilePhoneNumberVerified(true);
                         user.signOrLogin(code, new SaveListener<User>() {
                             @Override
                             public void done(User user, BmobException e) {
                                 if (e == null) {
-                                    Intent intent = new Intent(getApplication(),LoginActivity.class);
-                                    intent.putExtra("username",phone);
-                                    intent.putExtra("password",password);
-                                    startActivity(intent);
-                                    finish();
-                                    Toast.makeText(SetPasswordActivity.this, "注册成功", Toast.LENGTH_SHORT).show();
-                                    LogUtil.e("smile", "" + user.getUsername() + "-" + user.getObjectId());
+                                    UserIntegral integral = new UserIntegral();
+                                    integral.setIntegral(100);
+                                    integral.setUserId(user);
+                                    integral.setPhone(user.getUsername());
+                                    integral.save(new SaveListener<String>() {
+                                        @Override
+                                        public void done(String s, BmobException e) {
+                                            if (e == null){
+                                                Intent intent = new Intent(getApplication(),LoginActivity.class);
+                                                intent.putExtra("username",phone);
+                                                intent.putExtra("password",password);
+                                                startActivity(intent);
+                                                finish();
+                                                Toast.makeText(SetPasswordActivity.this, "注册成功", Toast.LENGTH_SHORT).show();
+
+                                            }else {
+                                                Log.e("SetPasswordActivity", e.getMessage() + e.getErrorCode());
+                                                Toast.makeText(SetPasswordActivity.this, e.getMessage() + e.getErrorCode(),
+                                                        Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    });
                                 } else {
                                     finish();
                                     Toast.makeText(SetPasswordActivity.this, "失败:" + e.getMessage(), Toast.LENGTH_LONG).show();
